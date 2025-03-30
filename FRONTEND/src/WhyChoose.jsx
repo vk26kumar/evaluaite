@@ -7,7 +7,6 @@ const WhyChoose = () => {
     "Fair & Bias-Free Evaluation",
     "Reduces Teacher Workload",
     "Detailed Performance Insights",
-    "Paperless & Eco-friendly",
     "Faster Results Processing",
   ];
   

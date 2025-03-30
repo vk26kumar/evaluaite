@@ -16,38 +16,32 @@ const pptRoutes = require("./routes/pptRoutes");
 
 const app = express();
 
-// Middleware
+
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(cookieParser());
 
-// Session middleware
 app.use(
   session({
     secret: "yourSecretKeyHere",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true },
+    cookie: { secure: true }, 
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// MongoDB Connection
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
-// Routes
 app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/data", marksRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/ppt", pptRoutes);
 
-// Start Server
-app.listen(5000, () => console.log("Server running on port 5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
