@@ -1,0 +1,85 @@
+.why-choose-section {
+    text-align: center;
+    padding: 50px 20px;
+    margin-bottom: 50px;
+    background: #fff;
+}
+
+.section-title {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.highlight {
+    background: linear-gradient(90deg, #333, #ff7b00);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 20px 0;
+    overflow: visible;
+    gap: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.card {
+    width: 250px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    position: relative;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+}
+
+/* Animation for Left-moving cards */
+.card-left {
+    animation-name: moveLeftRight;
+}
+
+/* Animation for Right-moving cards */
+.card-right {
+    animation-name: moveRightLeft;
+}
+
+/* Define Keyframes */
+@keyframes moveLeftRight {
+    0% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(-10px); }
+}
+
+@keyframes moveRightLeft {
+    0% { transform: translateX(10px); }
+    50% { transform: translateX(-10px); }
+    100% { transform: translateX(10px); }
+}
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 28px;
+    }
+
+    .cards-container {
+        flex-direction: column;
+        align-items: center; 
+        gap: 15px;
+    }
+
+    .card {
+        width: 90%;
+        max-width: 300px;
+        font-size: 14px; 
+    }
+}
+
