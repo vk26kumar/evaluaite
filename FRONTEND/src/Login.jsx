@@ -6,6 +6,9 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./Login.css";
 
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -35,7 +38,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -57,7 +60,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.open("http://localhost:5000/api/auth/google", "_self");
+    window.open(`${API_BASE_URL}/api/auth/google`, "_self");
   };
 
   return (

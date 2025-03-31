@@ -15,6 +15,8 @@ const Scorecard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchEvaluation = async () => {
       if (!evaluationId) {
@@ -26,7 +28,7 @@ const Scorecard = () => {
 
       try {
         console.log("Fetching evaluation for ID:", evaluationId);
-        const response = await axios.get("http://localhost:5000/api/data", {
+        const response = await axios.get(`${API_BASE_URL}/api/data`, {
           params: { id: evaluationId },
           headers: { "Content-Type": "application/json" },
         });

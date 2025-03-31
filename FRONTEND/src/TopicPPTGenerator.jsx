@@ -3,6 +3,8 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./TopicPPTGenerator.css";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
 const TopicPPTGenerator = () => {
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ const TopicPPTGenerator = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/ppt", {
+      const response = await fetch(`${API_BASE_URL}/api/ppt`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
