@@ -31,28 +31,24 @@ const Features = () => {
       <div className="features-grid">
         {features.map((feature, index) => (
           <motion.div
-            key={index}
-            className="feature-box"
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{
-              duration: 0.5,
-              ease: "easeOut",
-              delay: index * 0.1, // Staggered effect
-            }}
-            whileInView={{
-              y: [0, -5, 5, 0], // Floating toe-and-fro motion
-            }}
-            transition={{
-              duration: 2,
-              ease: "easeInOut",
-              repeat: Infinity, // Loops forever
-              repeatType: "reverse",
-              delay: index * 0.1, // Staggered floating effect
-            }}
-          >
-            {feature}
-          </motion.div>
+          key={index}
+          className="feature-box"
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          whileInView={{
+            y: [0, -5, 5, 0], // Floating motion
+          }}
+          transition={{
+            duration: 2, // Smooth floating animation
+            ease: "easeInOut",
+            repeat: Infinity,
+            repeatType: "reverse",
+            delay: index * 0.1, 
+          }}
+        >
+          {feature}
+        </motion.div>
+        
         ))}
       </div>
     </div>

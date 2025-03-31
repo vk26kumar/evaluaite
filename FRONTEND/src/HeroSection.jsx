@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import "./HeroSection.css";
-import HomeImg from "./homeImg";
+import HomeImg from "./HomeImg";
 import Navbar from "./Navbar";
 import { useNavigate } from "react-router-dom";
 
