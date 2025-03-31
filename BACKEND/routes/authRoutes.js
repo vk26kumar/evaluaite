@@ -60,7 +60,7 @@ router.get(
     });
 
     res.cookie("token", token, { httpOnly: true });
-    res.redirect(`https://ai-evaluaite.onrender.com?token=${token}`);
+    res.redirect(`https://ai-evaluaite-1.onrender.com?token=${token}`);
   }
 );
 
