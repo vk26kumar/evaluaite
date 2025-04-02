@@ -28,11 +28,11 @@ function App() {
   }, []);
 
   const ProtectedRoute = ({ children }) => {
-    return isAuthenticated ? children : <Navigate to="#/signup" replace />;
+    return isAuthenticated ? children : <Navigate to="/signup" replace />;
   };
 
   return (
-    <Router>  {/* ⬅️ Now using HashRouter */}
+    <Router> 
       <div>{modalOpen && <Modal onClose={() => setModalOpen(false)} />}</div>
 
       <Routes>
