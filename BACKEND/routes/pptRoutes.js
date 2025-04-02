@@ -1,30 +1,29 @@
+const express = require("express");
+const { generateSlides, generatePPT } = require("../utils/PptGemini");
+const path = require("path");
+const fs = require("fs");
+
+const router = express.Router();
+
 router.post("/", async (req, res) => {
   try {
     const { topic } = req.body;
+    if (!topic) return res.status(400).json({ error: "Topic is required" });
 
-    if (!topic) {
-      console.error("Error: No topic provided");
-      return res.status(400).json({ error: "Topic is required" });
-    }
-
-    console.log(`Generating slides for topic: ${topic}`);
-    
     const slides = await generateSlides(topic);
-    if (slides.length === 0) {
-      console.error("Error: No slides were generated.");
-      return res.status(500).json({ error: "Failed to generate slides" });
-    }
-
-    console.log("Slides generated successfully:", slides);
+    if (!slides.length) return res.status(500).json({ error: "Failed to generate slides" });
 
     const fileName = await generatePPT(topic, slides);
-    const filePath = path.resolve(__dirname, "..", fileName);
+    const filePath = path.join(__dirname, "..", fileName);
 
-    console.log(`Sending PPT file: ${filePath}`);
+    console.log(`Sending file: ${filePath}`);
 
-    res.download(filePath, fileName, (err) => {
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+
+    res.sendFile(filePath, (err) => {
       if (err) {
-        console.error("File download error:", err);
+        console.error("Error sending file:", err);
         return res.status(500).json({ error: "Error sending file" });
       }
 
@@ -39,3 +38,6 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+module.exports = router;
