@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,  // ⬅️ Use HashRouter instead of BrowserRouter
   Routes,
   Route,
   Navigate,
@@ -32,7 +32,7 @@ function App() {
   };
 
   return (
-    <Router>
+    <Router>  {/* ⬅️ Now using HashRouter */}
       <div>{modalOpen && <Modal onClose={() => setModalOpen(false)} />}</div>
 
       <Routes>
