@@ -28,7 +28,7 @@ function App() {
   }, []);
 
   const ProtectedRoute = ({ children }) => {
-    return isAuthenticated ? children : <Navigate to="/signup" replace />;
+    return isAuthenticated ? children : <Navigate to="#/signup" replace />;
   };
 
   return (

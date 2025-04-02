@@ -35,7 +35,7 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("#/login");
   };
 
   return (
@@ -48,10 +48,10 @@ function Navbar() {
         </button>
 
         <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-          <li><a href="/">Dashboard</a></li>
-          <li><Link to="/forms">Forms</Link></li>
-          <li><Link to="/Board">White Board</Link></li>
-          <li><Link to="/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></Link></li>
+          <li><a href="#/">Dashboard</a></li>
+          <li><Link to="#/forms">Forms</Link></li>
+          <li><Link to="#/Board">White Board</Link></li>
+          <li><Link to="#/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></Link></li>
         </ul>
         
         {isLoggedIn ? (
@@ -63,10 +63,10 @@ function Navbar() {
         {menuOpen && (
           <div className="mobile-menu">
             <ul>
-              <li><a href="/">Dashboard</a></li>
-              <li><Link to="/forms">Forms</Link></li>
-              <li><Link to="/Board">White Board</Link></li>
-              <li><Link to="/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></Link></li>
+              <li><a href="#/">Dashboard</a></li>
+              <li><Link to="#/forms">Forms</Link></li>
+              <li><Link to="#/Board">White Board</Link></li>
+              <li><Link to="#/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></Link></li>
             </ul>
           </div>
         )}
