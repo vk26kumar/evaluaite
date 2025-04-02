@@ -7,6 +7,7 @@ const evaluateAnswers = async (teacherAnswers, studentAnswers, difficulty) => {
 
   const prompt = `Evaluate the student's answers based on the teacher's answers. Strict checking is required—focus on logic rather than words.
     Difficulty Level: ${difficulty} - base your scores on the difficulty level.
+    means if easy ignore the minor mistake and give full marks , if medium then cut very less marks on mistake and if tough difficuilty level the give marks fairly.
   - Award marks out of 5 based on accuracy, completeness, and logical correctness.
 
    The Comment part should contain a small explanation of the score given.

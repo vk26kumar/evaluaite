@@ -7,7 +7,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./Signup.css";
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -41,6 +41,7 @@ const Signup = () => {
       const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
