@@ -6,8 +6,8 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./Login.css";
 
-
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +18,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    
     const token = localStorage.getItem("token");
     if (token) {
       navigate("/");
@@ -41,17 +40,18 @@ const Login = () => {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      console.log("Login Response:", data); 
+      console.log("Login Response:", data);
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        navigate("/"); 
+        navigate("/");
       } else {
-        setError(data.msg || "Invalid credentials"); 
+        setError(data.msg || "Invalid credentials");
       }
     } catch (error) {
       console.error("Login Error:", error);
@@ -60,8 +60,8 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "https://ai-evaluaite.onrender.com/api/auth/google";
-  };  
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
+  };
 
   return (
     <div className="login-container">
@@ -109,16 +109,19 @@ const Login = () => {
 
             <p className="or-continue-with-login">or continue with</p>
             <div className="google-login-container">
-              <button onClick={handleGoogleLogin} className="google-button-login">
+              <button
+                onClick={handleGoogleLogin}
+                className="google-button-login"
+              >
                 <FaGoogle className="google-icon" />
               </button>
             </div>
 
             <p className="signup-link">
               Don't have an account?{" "}
-              <a className="highlight-signup" href="/signup">
+              <Link className="highlight-signup" to="/signup">
                 Sign Up
-              </a>
+              </Link>
             </p>
           </div>
         </div>

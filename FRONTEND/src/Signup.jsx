@@ -7,7 +7,8 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./Signup.css";
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -48,7 +49,7 @@ const Signup = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        navigate("/"); 
+        navigate("/");
       } else {
         setError(data.message);
       }
@@ -73,9 +74,7 @@ const Signup = () => {
 
           <div className="signup-right">
             <h2>Sign Up</h2>
-
             {error && <p className="error-message">{error}</p>}
-
             <form onSubmit={handleSubmit} className="signup-form">
               <div className="input-group-signup">
                 <FaUser className="input-icon" />
@@ -114,20 +113,23 @@ const Signup = () => {
                 Sign Up
               </button>
             </form>
-
             <p className="or-continue-with">or continue with</p>
             <div className="google-login-container">
               <button onClick={handleGoogleLogin} className="google-button">
                 <FaGoogle className="google-icon" />
               </button>
             </div>
-
             <p className="login-link">
               Already have an account?{" "}
-              <a className="highlight-login" href="/login">
+              <span
+                className="highlight-login"
+                onClick={() => navigate("/login")}
+                style={{ cursor: "pointer", textDecoration: "underline" }}
+              >
                 Login
-              </a>
+              </span>
             </p>
+            ;
           </div>
         </div>
       </div>
