@@ -49,9 +49,9 @@ function Navbar() {
 
         <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
           <li><a href="/">Dashboard</a></li>
-          <li><a href="/forms">Forms</a></li>
-          <li><a href="/Board">White Board</a></li>
-          <li><a href="/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></a></li>
+          <li><Link to="/forms">Forms</Link></li>
+          <li><Link to="/Board">White Board</Link></li>
+          <li><Link to="/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></Link></li>
         </ul>
         
         {isLoggedIn ? (
@@ -64,9 +64,9 @@ function Navbar() {
           <div className="mobile-menu">
             <ul>
               <li><a href="/">Dashboard</a></li>
-              <li><a href="/forms">Forms</a></li>
-              <li><a href="/Board">White Board</a></li>
-              <li><a href="/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></a></li>
+              <li><Link to="/forms">Forms</Link></li>
+              <li><Link to="/Board">White Board</Link></li>
+              <li><Link to="/TopicPPTGenerator">Generate PPT<span className="new-badge">New</span></Link></li>
             </ul>
           </div>
         )}
