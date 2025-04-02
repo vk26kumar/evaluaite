@@ -60,7 +60,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/api/auth/google`;
+    window.open(`${API_BASE_URL}/api/auth/google`, "_self");
   };
 
   return (
