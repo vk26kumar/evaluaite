@@ -8,7 +8,6 @@ import {
 import HeroSection from "./HeroSection";
 import Footer from "./Footer";
 import WhyChoose from "./WhyChoose";
-import Modal from "./Modal";
 import Form from "./Form";
 import Signup from "./Signup";
 import Login from "./Login";
@@ -19,7 +18,6 @@ import Features from "./Features";
 import TopicPPTGenerator from "./TopicPPTGenerator";
 
 function App() {
-  const [modalOpen, setModalOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -33,8 +31,7 @@ function App() {
 
   return (
     <Router> 
-      <div>{modalOpen && <Modal onClose={() => setModalOpen(false)} />}</div>
-
+  
       <Routes>
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
