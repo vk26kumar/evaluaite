@@ -60,8 +60,9 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.open(`${API_BASE_URL}/api/auth/google`, "_self");
+    window.open("https://ai-evaluaite.onrender.com/api/auth/google", "_self");
   };
+  
 
   return (
     <div className="login-container">
