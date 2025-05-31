@@ -1,0 +1,25 @@
+.footer {
+    position: relative;
+    text-align: center;
+    padding: 0px;
+    background-color: white;
+    color: black;
+    font-family: Arial, sans-serif;
+}
+
+.footer-brand {
+    margin-top: -50px;
+    font-size: 200px;
+    font-weight: 800;
+    color: rgba(0, 0, 0, 0.08);
+    text-shadow: 2px 1px 9px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    margin-bottom: -52px;
+}
+@media (max-width: 768px) {
+    .footer-brand {
+        font-size: 80px;
+        margin-top: -20px; 
+        margin-bottom: -25px;
+    }
+}
