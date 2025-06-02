@@ -1,0 +1,158 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+.whiteboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: white;
+  margin-top: 50px;
+}
+
+.whiteboard-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  background: linear-gradient(to right, #111827, #ea580c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.board-card {
+  background: linear-gradient(to bottom, #1a1a1a, #121212);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 20px rgba(0, 255, 204, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.canvas {
+  width: 1000px;
+  height: 600px;
+  background: #f6f4f2;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 2px solid #ff8c00;
+  background: rgba(240, 241, 243, 0.9);
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+.controls label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #333;
+}
+
+.controls input[type="color"],
+.controls select {
+  width: 40px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.controls input[type="range"] {
+  width: 100px;
+  cursor: pointer;
+  accent-color: #00ffcc;
+}
+
+.controls button {
+  background: #ff8c00;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: back-ground 0.2s ease-in-out;
+}
+
+.controls button:hover {
+  background: #a8670b;
+}
+
+.clear-btn {
+  background: #da3633;
+}
+
+.clear-btn:hover {
+  background: #ff4d4d;
+}
+
+@media (max-width: 1024px) {
+    .canvas {
+      width: 90%;
+      height: 500px;
+    }
+  
+    .whiteboard-title {
+      font-size: 24px;
+    }
+  
+    .controls {
+      padding: 10px;
+      gap: 10px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .canvas {
+      width: 100%;
+      height: 400px;
+    }
+  
+    .whiteboard-title {
+      font-size: 22px;
+    }
+  
+    .controls {
+      flex-direction: column;
+      gap: 8px;
+    }
+  
+    .controls input[type="color"],
+    .controls select,
+    .controls button {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .canvas {
+      height: 300px;
+    }
+  
+    .whiteboard-title {
+      font-size: 20px;
+    }
+  
+    .controls {
+      gap: 5px;
+    }
+  
+    .controls button {
+      padding: 6px 10px;
+    }
+  }
