@@ -52,6 +52,8 @@ const extractTextFromImage = async (imageBuffer) => {
     }
 
     return answersArray;
+    console.log("Final extracted answers array:", answersArray);
+
   } catch (error) {
     console.error("Error extracting text:", error);
     return [];
