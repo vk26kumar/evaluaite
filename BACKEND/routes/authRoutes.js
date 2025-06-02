@@ -61,7 +61,5 @@ router.get(
 
     res.cookie("token", token, { httpOnly: true });
     res.redirect(`${process.env.CLIENT_URL}?token=${token}`);
-  };
+  }
 );
-
-module.exports = router;
