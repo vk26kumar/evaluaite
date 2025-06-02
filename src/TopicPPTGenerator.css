@@ -1,0 +1,96 @@
+.ppt-container {
+    width: 50%;
+    max-width: 600px; 
+    min-width: 300px; 
+    margin: 200px auto; 
+    padding: 50px;
+    background: linear-gradient(to bottom, #1a1a1a, #121212);
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.ppt-container h2 {
+    font-size: 24px; 
+    margin-bottom: 10px;
+}
+
+.ppt-container p {
+    font-size: 16px;
+    color: #b0b0b0;
+    margin-bottom: 20px;
+}
+
+.ppt-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.ppt-input {
+    width: 90%;
+    max-width: 400px;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ff8c00;
+    border-radius: 8px;
+    background: #222;
+    color: white;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.ppt-input:focus {
+    border-color: #ffae42;
+}
+
+.ppt-button {
+    margin-top: 15px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #ff8c00;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: back-ground 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.ppt-button:hover {
+    background: #ffae42;
+    transform: scale(1.05);
+}
+
+
+@media (max-width: 768px) {
+    .ppt-container {
+        width: 80%;
+        padding: 40px;
+        margin: 200px auto;
+    }
+
+    .ppt-input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .ppt-container {
+        width: 80%;
+        padding: 30px;
+        margin: 250px auto;
+    }
+
+    .ppt-input {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    .ppt-button {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+}
