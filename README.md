@@ -1,3 +1,17 @@
+<<<<<<< HEAD
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+=======
 Problem Statement:
 "Teachers spend a significant amount of time manually grading answer sheets, which is
 a tedious, time-consuming, and error-prone process. This leads to delayed feedback for
@@ -45,3 +59,4 @@ Handwriting Recognition Integration – Combining OCR with AI grading enables th
 handwritten answers, which many existing tools struggle with.
 Time & Effort Reduction – Cuts grading time significantly, allowing teachers to focus on student
 engagement rather than manual corrections.
+>>>>>>> e3aaf4392ebfcba07e691b865a85c6b9b1d6a78d

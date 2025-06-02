@@ -1,0 +1,160 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: white;
+  color: #333;
+  font-family: 'Inter', sans-serif;
+}
+.logo{
+  font-size: 25px;
+}
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 180px;
+  background: white;
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
+  border-radius: 10px;
+}
+
+.hamburger {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: 135px; 
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.scrolled {
+  box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 30px;
+  width: 60%;
+  padding: 5px 25px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s ease-in-out;
+}
+
+.nav-links a:hover {
+  color: #ff7b00;
+}
+
+.new-badge {
+  background-color: #ff7b00;
+  color: white;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  margin-left: 5px;
+}
+
+/* Sign Up Button */
+.sign-up {
+  background: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  border: 2px solid #ccc;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 4px 4px 0px #bbb, 6px 6px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.sign-up:hover {
+  background: #f0f0f0;
+  box-shadow: 3px 3px 3px #bbb;
+}
+
+.sign-up:active {
+  transform: translateY(2px);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+      padding: 10px 20px;
+      width: 90%;
+  }
+
+  .scrolled {
+      width: 85%;
+  }
+
+  .nav-links {
+      display: none;
+  }
+
+  .hamburger {
+      display: block;
+  }
+
+  .mobile-menu {
+      display: block;
+      position: absolute;
+      border-radius: 20px;
+      top: 65px;
+      left: 0;
+      width: 100%;
+      background: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .mobile-menu a{
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+  }
+
+  .mobile-menu ul {
+      list-style: none;
+      padding: 10px;
+      margin: 0;
+  }
+
+  .mobile-menu ul li {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+  }
+
+  .mobile-menu ul li:last-child {
+      border-bottom: none;
+  }
+
+  .hero {
+      margin: 100px 20px 30px;
+      padding: 30px 15px;
+      border-radius: 10px;
+  }
+
+  h1 {
+      font-size: 32px;
+  }
+
+  .text {
+      font-size: 14px;
+  }
+}
