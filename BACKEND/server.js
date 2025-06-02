@@ -12,7 +12,7 @@ require("./utils/passport");
 const evaluationRoutes = require("./routes/EvaluationRoute.js");
 const marksRoutes = require("./routes/MarksRoute.js");
 const authRoutes = require("./routes/authRoutes.js");
-const pptRoutes = require("./routes/pptRoutes");
+const pptRoutes = require("./routes/pptRoutes.js");
 
 const app = express();
 
