@@ -12,13 +12,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 180px;
+  padding: 10px 200px;
   background: white;
   position: fixed;
   top: 15px;
   left: 50%;
   transform: translateX(-50%);
-  width: 70%;
+  width: 90%;
   transition: all 0.3s ease-in-out;
   z-index: 1000;
   border-radius: 10px;
@@ -38,9 +38,9 @@ body {
 
 .scrolled {
   box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.2);
-  border-radius: 30px;
-  width: 60%;
-  padding: 5px 25px;
+  border-radius: 20px;
+  width: 75%;
+  padding: 5px 15px;
 }
 
 .nav-links {
@@ -96,12 +96,12 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-      padding: 10px 20px;
+      padding: 10px 30px;
       width: 90%;
   }
 
   .scrolled {
-      width: 85%;
+      width: 50%;
   }
 
   .nav-links {

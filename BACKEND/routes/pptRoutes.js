@@ -15,6 +15,10 @@ router.post("/", async (req, res) => {
 
     const fileName = await generatePPT(topic, slides);
     const filePath = path.join(__dirname, "..", fileName);
+    if (!fs.existsSync(filePath)) {
+  console.error("PPT file not found at:", filePath);
+  return res.status(500).json({ error: "Generated PPT file not found" });
+}
 
     console.log(`Sending file: ${filePath}`);
 
