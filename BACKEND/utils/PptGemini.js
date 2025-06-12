@@ -27,6 +27,8 @@ const generateSlides = async (topic) => {
   try {
     const result = await model.generateContent(prompt);
     const responseText = await result.response.text();
+    console.log("📄 Gemini Raw Response:\n", responseText);
+
 
     const slidesData = responseText.split(/(?=\*\*Slide \d+\*\*)/).slice(1);
 
@@ -53,7 +55,7 @@ const generateSlides = async (topic) => {
       .slice(0, 5);
   } catch (error) {
     console.error("❌ Gemini API Error:", error);
-    return [];
+    throw new Error("Gemini generation failed");
   }
 };
 
@@ -91,12 +93,10 @@ const generatePPT = async (title, slides) => {
       align: "center",
     });
 
-    let bulletPoints = content
-      .split("\n")
-      .map((point) => ({
-        text: point,
-        options: { fontSize: 20, color: "FFFFFF" },
-      }));
+    let bulletPoints = content.split("\n").map((point) => ({
+      text: point,
+      options: { fontSize: 20, color: "FFFFFF" },
+    }));
 
     slide.addText(bulletPoints, {
       x: "10%",

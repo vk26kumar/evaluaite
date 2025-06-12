@@ -6,11 +6,13 @@ const { evaluateAnswers } = require("../utils/geminiHelper");
 router.get("/", async (req, res) => {
   try {
     const { id } = req.query;
+    console.log("🔍 GET /api/data - Received ID:", id);
     if (!id) {
       return res.status(400).json({ message: "Missing evaluation ID" });
     }
 
     const evaluation = await Evaluation.findById(id);
+    console.log("📦 Evaluation found:", evaluation);
 
     if (!evaluation) {
       return res.status(404).json({ message: "Evaluation not found" });

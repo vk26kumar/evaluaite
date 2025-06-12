@@ -19,7 +19,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
+    
     const extractedAnswers = await extractTextFromImage(imageFile.buffer);
 
     const parsedReferenceAnswers = JSON.parse(referenceAnswers);

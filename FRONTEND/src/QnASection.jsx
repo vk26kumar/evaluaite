@@ -47,13 +47,19 @@ const QnASection = ({ onReferenceChange }) => {
     setLoadingStates((prev) => ({ ...prev, [index]: true }));
 
     try {
-      const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1", {
+      const response = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${API_KEY}`,
         },
-        body: JSON.stringify({ inputs: `Answer this question: ${questionText}` }),
+        body: JSON.stringify({
+        inputs: `Answer this question: ${questionText}`,
+        parameters: {
+          max_new_tokens: 1000,
+          return_full_text: false,
+        },
+      }),
       });
 
       const data = await response.json();

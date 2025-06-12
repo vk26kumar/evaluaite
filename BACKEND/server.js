@@ -31,7 +31,7 @@ app.use(
     secret: "yourSecretKeyHere",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }, 
+    cookie: { secure: false }, 
   })
 );
 
@@ -50,3 +50,11 @@ app.use("/api/ppt", pptRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('🔥 Uncaught Exception:', err);
+});

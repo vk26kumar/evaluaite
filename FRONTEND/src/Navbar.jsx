@@ -7,6 +7,14 @@ import logo from "./assets/image.png";
 
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate(); 
@@ -40,7 +48,7 @@ function Navbar() {
             src={logo}
             alt="Evaluate Logo"
             className="logo-animate"
-            style={{ height: "70px", verticalAlign: "middle" }}
+            style={{ height: "60px", verticalAlign: "start" }}
           />
         </div>
 
