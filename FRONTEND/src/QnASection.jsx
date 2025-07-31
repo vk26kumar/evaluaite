@@ -7,24 +7,25 @@ const QnASection = ({ onReferenceChange }) => {
   const [questions, setQuestions] = useState([{ question: "", answer: "" }]);
   const [loadingStates, setLoadingStates] = useState({});
 
-  
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+
   const addQuestion = () => {
-    setQuestions([...questions, { question: "", answer: "" }]);
-    updateReferenceAnswers([...questions, { question: "", answer: "" }]);
+    const newQuestions = [...questions, { question: "", answer: "" }];
+    setQuestions(newQuestions);
+    updateReferenceAnswers(newQuestions);
   };
 
- 
   const removeQuestion = (index) => {
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
     updateReferenceAnswers(updatedQuestions);
   };
 
- 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
-    const reordered = Array.from(questions);
+    const reordered = [...questions];
     const [movedItem] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, movedItem);
 
@@ -32,54 +33,50 @@ const QnASection = ({ onReferenceChange }) => {
     updateReferenceAnswers(reordered);
   };
 
-  
   const updateReferenceAnswers = (newQ) => {
     onReferenceChange(newQ.map(({ question, answer }) => ({ question, answer })));
   };
 
-  
-  const API_KEY = import.meta.env.VITE_HUGGINGFACE_API_KEY;
-
   const generateAIAnswer = async (index) => {
-    const questionText = questions[index].question;
-    if (!questionText.trim()) return;
+    const questionText = questions[index].question.trim();
+    if (!questionText) return;
 
     setLoadingStates((prev) => ({ ...prev, [index]: true }));
 
     try {
-      const response = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta", {
+      const response = await fetch(GEMINI_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-        inputs: `Answer this question: ${questionText}`,
-        parameters: {
-          max_new_tokens: 1000,
-          return_full_text: false,
-        },
-      }),
+          contents: [
+            {
+              parts: [{ text: questionText }],
+            },
+          ],
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Gemini API Error:", errorData);
+        throw new Error("Gemini API call failed");
+      }
 
       const data = await response.json();
 
-      if (Array.isArray(data) && data.length > 0) {
-        let aiAnswer = data[0]?.generated_text || "Couldn't generate an answer.";
+      const aiAnswer =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+        "Couldn't generate an answer.";
 
-        aiAnswer = aiAnswer.replace(questionText, "").trim();
-        aiAnswer = aiAnswer.replace(/Answer this question:\s*/i, "").trim();
-        aiAnswer = aiAnswer.replace(/Answer:\s*/i, "").trim();
-
-        const newQ = [...questions];
-        newQ[index].answer = aiAnswer;
-        setQuestions(newQ);
-        updateReferenceAnswers(newQ);
-      } else {
-        console.error("Unexpected API response format:", data);
-      }
+      const newQ = [...questions];
+      newQ[index].answer = aiAnswer;
+      setQuestions(newQ);
+      updateReferenceAnswers(newQ);
     } catch (error) {
       console.error("Error generating AI answer:", error);
+      alert("Failed to generate answer. Please check your Gemini API key or try again later.");
     } finally {
       setLoadingStates((prev) => ({ ...prev, [index]: false }));
     }
@@ -88,7 +85,6 @@ const QnASection = ({ onReferenceChange }) => {
   return (
     <div className="qna-container">
       <h2>Q&A Panel</h2>
-
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="qnaList">
           {(provided) => (
@@ -130,7 +126,11 @@ const QnASection = ({ onReferenceChange }) => {
                           updateReferenceAnswers(newQ);
                         }}
                       />
-                      <button className="ai-btn" onClick={() => generateAIAnswer(index)}>
+                      <button
+                        className="ai-btn"
+                        onClick={() => generateAIAnswer(index)}
+                        disabled={loadingStates[index]}
+                      >
                         <FaMagic /> Generate Answer with AI
                       </button>
                     </div>
@@ -142,7 +142,6 @@ const QnASection = ({ onReferenceChange }) => {
           )}
         </Droppable>
       </DragDropContext>
-
       <button className="add-btn" onClick={addQuestion}>
         <FaPlus /> Add More
       </button>

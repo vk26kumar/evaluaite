@@ -5,8 +5,24 @@ body {
   color: #333;
   font-family: 'Inter', sans-serif;
 }
-.logo{
-  font-size: 25px;
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4a2602;
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-shadow: 1px 2px 8px rgba(255, 123, 0, 0.08), 0 1px 0 #fff;
+  padding: 6px 18px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #fffbe6 60%, #ffe0b2 100%);
+  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.07);
+  transition: color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.logo:hover {
+  color: #ff7b00;
+  background: linear-gradient(90deg, #fff3e0 60%, #ffd699 100%);
+  box-shadow: 0 4px 16px rgba(255, 123, 0, 0.13);
 }
 .navbar {
   display: flex;

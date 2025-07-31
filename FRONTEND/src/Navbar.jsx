@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Navbar.css";
 import Board from "./Board";
-import logo from "./assets/image.png"; 
 
 
 function Navbar() {
@@ -44,12 +43,7 @@ function Navbar() {
     <div className="app">
       <nav className={`navbar content ${isScrolled ? "scrolled" : ""}`}>
         <div className="logo">
-          <img
-            src={logo}
-            alt="Evaluate Logo"
-            className="logo-animate"
-            style={{ height: "60px", verticalAlign: "start" }}
-          />
+          AI-Evaluate
         </div>
 
         <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>

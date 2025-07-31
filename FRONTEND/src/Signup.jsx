@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate,Link } from "react-router-dom";
-import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
-import { FaGoogle } from "react-icons/fa";
+import { useNavigate, Link } from "react-router-dom";
+import { FaUser, FaEnvelope, FaLock, FaGoogle } from "react-icons/fa";
 
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./Signup.css";
 
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +14,7 @@ const Signup = () => {
     email: "",
     password: "",
   });
+
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -32,10 +31,13 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.email || !formData.password) {
+
+    const { username, email, password } = formData;
+    if (!username || !email || !password) {
       setError("All fields are required");
       return;
     }
+
     setError("");
 
     try {
@@ -47,22 +49,27 @@ const Signup = () => {
       });
 
       const data = await response.json();
+
       if (response.ok) {
         localStorage.setItem("token", data.token);
         navigate("/");
       } else {
-        setError(data.message);
+        if (data.message?.toLowerCase().includes("email already")) {
+          setError("Email already registered. Please login.");
+        } else {
+          setError(data.message || "Signup failed");
+        }
       }
-    } catch (error) {
-      console.error("Signup Error:", error);
-      setError("Something went wrong");
+    } catch (err) {
+      console.error("Signup Error:", err);
+      setError("Something went wrong. Please try again later.");
     }
   };
 
   const handleGoogleLogin = () => {
-    window.open("https://ai-evaluaite.onrender.com/api/auth/google", "_self");
+    window.open(`${API_BASE_URL}/api/auth/google`, "_self");
   };
-  
+
   return (
     <div className="signup-container">
       <Navbar />
@@ -74,7 +81,13 @@ const Signup = () => {
 
           <div className="signup-right">
             <h2>Sign Up</h2>
-            {error && <p className="error-message">{error}</p>}
+
+            {error && (
+              <p className="error-message" style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
+                {error}
+              </p>
+            )}
+
             <form onSubmit={handleSubmit} className="signup-form">
               <div className="input-group-signup">
                 <FaUser className="input-icon" />
@@ -113,12 +126,14 @@ const Signup = () => {
                 Sign Up
               </button>
             </form>
+
             <p className="or-continue-with">or continue with</p>
             <div className="google-login-container">
               <button onClick={handleGoogleLogin} className="google-button">
                 <FaGoogle className="google-icon" />
               </button>
             </div>
+
             <p className="login-link">
               Already have an account?{" "}
               <span

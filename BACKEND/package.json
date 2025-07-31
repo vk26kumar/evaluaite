@@ -11,7 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
@@ -27,6 +27,7 @@
     "multer": "^1.4.5-lts.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.10",
+    "openai": "^5.10.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pptxgenjs": "^3.12.0",
