@@ -19,10 +19,10 @@ router.post("/", upload.single("image"), async (req, res) => {
     ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    
-    const extractedAnswers = await extractTextFromImage(imageFile.buffer);
 
     const parsedReferenceAnswers = JSON.parse(referenceAnswers);
+
+    const extractedAnswers = await extractTextFromImage(imageFile.buffer);
 
     const newEvaluation = new Evaluation({
       referenceAnswers: parsedReferenceAnswers,
@@ -32,14 +32,14 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     await newEvaluation.save();
 
-    res
+    return res
       .status(201)
       .json({ message: "Evaluation created", id: newEvaluation._id });
   } catch (error) {
-    console.error("🚨 Internal Server Error:", error);
+    console.error("🚨 Evaluation creation failed:", error.message || error);
     res
       .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+      .json({ error: "Evaluation failed", details: error.message });
   }
 });
 

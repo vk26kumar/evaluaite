@@ -71,6 +71,9 @@ export default function Form() {
         <h1 className="form-title">
           AI Automated <span className="highlight">Evaluation</span>
         </h1>
+        <div className="prototype-note">
+          ⚠️ This feature of website is currently working as a prototype with hardcoded mock answer setup.
+        </div>
         <p className="form-text">
           Upload your document, add questions and answers, <br />
           and let our AI evaluate your responses with precision.

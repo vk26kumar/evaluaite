@@ -29,35 +29,42 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setError("All fields are required");
-      return;
-    }
-    setError("");
+  e.preventDefault();
+  if (!formData.email || !formData.password) {
+    setError("All fields are required");
+    return;
+  }
+  setError("");
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
 
-      const data = await response.json();
-      console.log("Login Response:", data);
+    const data = await response.json();
+    console.log("Login Response:", data);
 
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        navigate("/");
+    if (response.ok) {
+      localStorage.setItem("token", data.token);
+      navigate("/");
+    } else {
+      if (data.msg?.toLowerCase().includes("not registered")) {
+        setError("Email not registered. Please sign up.");
+      } else if (data.msg?.toLowerCase().includes("invalid")) {
+        setError("Invalid email or password.");
       } else {
-        setError(data.msg || "Invalid credentials");
+        setError(data.msg || "Login failed");
       }
-    } catch (error) {
-      console.error("Login Error:", error);
-      setError("Something went wrong");
     }
-  };
+  } catch (error) {
+    console.error("Login Error:", error);
+    setError("Something went wrong");
+  }
+};
+
 
   const handleGoogleLogin = () => {
     window.open("https://ai-evaluaite.onrender.com/api/auth/google", "_self");
