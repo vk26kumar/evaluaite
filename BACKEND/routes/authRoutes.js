@@ -6,24 +6,33 @@ const User = require("../models/User.js");
 
 const router = express.Router();
 
-// Signup
+// ✅ Signup
 router.post("/signup", async (req, res) => {
-  const { name, email, password } = req.body;
+  const { username, email, password } = req.body; // fixed: username not name
   try {
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ msg: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    user = new User({ name, email, password: hashedPassword });
+    user = new User({ name: username, email, password: hashedPassword });
 
     await user.save();
-    res.json({ msg: "Signup successful" });
+
+    // Optionally generate token on signup too
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res
+      .cookie("token", token, { httpOnly: true })
+      .json({ token, msg: "Signup successful" }); // ✅ include token in response
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: "Server error" });
   }
 });
 
-// Login
+// ✅ Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -39,13 +48,14 @@ router.post("/login", async (req, res) => {
 
     res
       .cookie("token", token, { httpOnly: true })
-      .json({ msg: "Login successful" });
+      .json({ token, msg: "Login successful" }); // ✅ include token in response
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: "Server error" });
   }
 });
 
-// Google OAuth
+// ✅ Google OAuth
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -63,3 +73,5 @@ router.get(
     res.redirect(`${process.env.CLIENT_URL}?token=${token}`);
   }
 );
+
+module.exports = router;

@@ -2,57 +2,57 @@
 
 body {
   font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .whiteboard-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background: white;
-  margin-top: 50px;
-}
-
-.whiteboard-title {
-  text-align: center;
-  font-size: 28px;
-  font-weight: bold;
-  background: linear-gradient(to right, #111827, #ea580c);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-transform: uppercase;
-  margin-bottom: 5px;
+  padding-top: 60px;
+  padding-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .board-card {
   background: linear-gradient(to bottom, #1a1a1a, #121212);
-  padding: 20px;
+  padding: 16px;
   border-radius: 12px;
   box-shadow: 0px 4px 20px rgba(0, 255, 204, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  width: 100%;
+  max-width: 1000px;
+  box-sizing: border-box;
 }
 
 .canvas {
-  width: 1000px;
+  width: 100%;
+  max-width: 1000px;
   height: 600px;
   background: #f6f4f2;
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  touch-action: none;
 }
 
 .controls {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  border: 2px solid #ff8c00;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 14px;
   background: rgba(240, 241, 243, 0.9);
-  padding: 12px 20px;
+  border: 2px solid #ff8c00;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
 }
 
 .controls label {
@@ -75,7 +75,7 @@ body {
 .controls input[type="range"] {
   width: 100px;
   cursor: pointer;
-  accent-color: #00ffcc;
+  accent-color: #000000;
 }
 
 .controls button {
@@ -83,10 +83,11 @@ body {
   color: white;
   font-weight: bold;
   border: none;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
-  transition: back-ground 0.2s ease-in-out;
+  font-size: 14px;
+  transition: background 0.2s ease-in-out;
 }
 
 .controls button:hover {
@@ -101,58 +102,45 @@ body {
   background: #ff4d4d;
 }
 
+/* Tablet */
 @media (max-width: 1024px) {
-    .canvas {
-      width: 90%;
-      height: 500px;
-    }
-  
-    .whiteboard-title {
-      font-size: 24px;
-    }
-  
-    .controls {
-      padding: 10px;
-      gap: 10px;
-    }
+  .canvas {
+    height: 500px;
   }
-  
-  @media (max-width: 768px) {
-    .canvas {
-      width: 100%;
-      height: 400px;
-    }
-  
-    .whiteboard-title {
-      font-size: 22px;
-    }
-  
-    .controls {
-      flex-direction: column;
-      gap: 8px;
-    }
-  
-    .controls input[type="color"],
-    .controls select,
-    .controls button {
-      width: 100%;
-    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .canvas {
+    height: 400px;
   }
-  
-  @media (max-width: 480px) {
-    .canvas {
-      height: 300px;
-    }
-  
-    .whiteboard-title {
-      font-size: 20px;
-    }
-  
-    .controls {
-      gap: 5px;
-    }
-  
-    .controls button {
-      padding: 6px 10px;
-    }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
+
+  .controls label {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .controls input[type="color"],
+  .controls select,
+  .controls input[type="range"],
+  .controls button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .canvas {
+    height: 300px;
+  }
+
+  .controls button {
+    padding: 6px;
+    font-size: 13px;
+  }
+}

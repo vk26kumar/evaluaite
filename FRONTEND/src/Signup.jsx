@@ -6,7 +6,8 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import "./Signup.css";
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_URL || "https://ai-evaluaite.onrender.com";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -14,8 +15,8 @@ const Signup = () => {
     email: "",
     password: "",
   });
-
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,14 +32,12 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { username, email, password } = formData;
-    if (!username || !email || !password) {
+    if (!formData.username || !formData.email || !formData.password) {
       setError("All fields are required");
       return;
     }
-
     setError("");
+    setLoading(true);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
@@ -49,25 +48,27 @@ const Signup = () => {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         localStorage.setItem("token", data.token);
         navigate("/");
       } else {
-        if (data.message?.toLowerCase().includes("email already")) {
-          setError("Email already registered. Please login.");
+        if (data.msg?.toLowerCase().includes("already")) {
+          alert("Email is already registered. Please login instead.");
+          navigate("/login");
         } else {
-          setError(data.message || "Signup failed");
+          setError(data.msg || "Signup failed");
         }
       }
-    } catch (err) {
-      console.error("Signup Error:", err);
-      setError("Something went wrong. Please try again later.");
+    } catch (error) {
+      console.error("Signup Error:", error);
+      setError("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    window.open(`${API_BASE_URL}/api/auth/google`, "_self");
+    window.open("https://ai-evaluaite.onrender.com/api/auth/google", "_self");
   };
 
   return (
@@ -81,13 +82,7 @@ const Signup = () => {
 
           <div className="signup-right">
             <h2>Sign Up</h2>
-
-            {error && (
-              <p className="error-message" style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
-                {error}
-              </p>
-            )}
-
+            {error && <p className="error-message">{error}</p>}
             <form onSubmit={handleSubmit} className="signup-form">
               <div className="input-group-signup">
                 <FaUser className="input-icon" />
@@ -122,8 +117,8 @@ const Signup = () => {
                 />
               </div>
 
-              <button type="submit" className="signup-button">
-                Sign Up
+              <button type="submit" className="signup-button" disabled={loading}>
+                {loading ? <span className="spinner"></span> : "Sign Up"}
               </button>
             </form>
 
@@ -139,7 +134,7 @@ const Signup = () => {
               <span
                 className="highlight-login"
                 onClick={() => navigate("/login")}
-                style={{ cursor: "pointer", textDecoration: "underline" }}
+                style={{ cursor: "pointer" }}
               >
                 Login
               </span>

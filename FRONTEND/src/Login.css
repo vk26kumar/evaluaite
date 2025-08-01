@@ -121,7 +121,7 @@
 .highlight-signup {
   color: rgb(143, 97, 12);
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .or-continue-with-login {

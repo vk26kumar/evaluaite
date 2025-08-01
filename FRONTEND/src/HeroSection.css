@@ -1,12 +1,14 @@
 .hero {
   text-align: center;
   background-color: #f6f4f2;
-  padding: 50px 40px;
+  padding: 50px 60px;
   margin: 150px 210px 40px;
   border-radius: 15px;
   box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.2);
 }
-
+.app{
+  margin-top: 100px;
+}
 h1 {
   font-size: 50px;
   font-weight: bold;
