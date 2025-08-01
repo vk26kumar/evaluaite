@@ -7,8 +7,8 @@ const QnASection = ({ onReferenceChange }) => {
   const [questions, setQuestions] = useState([{ question: "", answer: "" }]);
   const [loadingStates, setLoadingStates] = useState({});
 
-  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+  const COHERE_API_KEY = import.meta.env.VITE_COHERE_API_KEY;
+  const COHERE_ENDPOINT = "https://api.cohere.ai/v1/chat";
 
   const addQuestion = () => {
     const newQuestions = [...questions, { question: "", answer: "" }];
@@ -44,39 +44,30 @@ const QnASection = ({ onReferenceChange }) => {
     setLoadingStates((prev) => ({ ...prev, [index]: true }));
 
     try {
-      const response = await fetch(GEMINI_ENDPOINT, {
+      const response = await fetch(COHERE_ENDPOINT, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${COHERE_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: questionText }],
-            },
-          ],
+          model: "command-r-plus",
+          message: questionText,
+          temperature: 0.5,
+          chat_history: [],
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Gemini API Error:", errorData);
-        throw new Error("Gemini API call failed");
-      }
-
       const data = await response.json();
-
-      const aiAnswer =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-        "Couldn't generate an answer.";
+      const aiAnswer = data?.text?.trim() || "Couldn't generate an answer.";
 
       const newQ = [...questions];
       newQ[index].answer = aiAnswer;
       setQuestions(newQ);
       updateReferenceAnswers(newQ);
     } catch (error) {
-      console.error("Error generating AI answer:", error);
-      alert("Failed to generate answer. Please check your Gemini API key or try again later.");
+      console.error("Cohere API Error:", error);
+      alert("Failed to generate answer. Please check your Cohere API key or try again.");
     } finally {
       setLoadingStates((prev) => ({ ...prev, [index]: false }));
     }
