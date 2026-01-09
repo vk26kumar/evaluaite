@@ -108,16 +108,6 @@ const Login = () => {
               </button>
             </form>
 
-            <p className="or-continue-with-login">or continue with</p>
-            <div className="google-login-container">
-              <button
-                onClick={handleGoogleLogin}
-                className="google-button-login"
-              >
-                <FaGoogle className="google-icon" />
-              </button>
-            </div>
-
             <p className="signup-link">
               Don't have an account?{" "}
               <Link className="highlight-signup" to="/signup">
