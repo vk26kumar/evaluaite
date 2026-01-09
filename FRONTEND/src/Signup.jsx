@@ -89,7 +89,7 @@ const Signup = () => {
                 <input
                   type="text"
                   name="username"
-                  placeholder="Username"
+                  placeholder="  Username"
                   value={formData.username}
                   onChange={handleChange}
                 />
@@ -100,7 +100,7 @@ const Signup = () => {
                 <input
                   type="email"
                   name="email"
-                  placeholder="Email"
+                  placeholder="  Email"
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -111,7 +111,7 @@ const Signup = () => {
                 <input
                   type="password"
                   name="password"
-                  placeholder="Password"
+                  placeholder="  Password"
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -122,13 +122,7 @@ const Signup = () => {
               </button>
             </form>
 
-            <p className="or-continue-with">or continue with</p>
-            <div className="google-login-container">
-              <button onClick={handleGoogleLogin} className="google-button">
-                <FaGoogle className="google-icon" />
-              </button>
-            </div>
-
+          
             <p className="login-link">
               Already have an account?{" "}
               <span
