@@ -99,8 +99,9 @@ function describeShortfall(shortfall) {
  * @param {{buffer: Buffer, mimeType: string}} [input.file] reference file to attach
  * @param {string} [input.referenceText] text material or saved notes from an earlier generation
  * @param {string[]} [input.avoid] previous question texts, when regenerating
+ * @param {object} [input.meta] receives `model`, the model that wrote the paper
  */
-async function generatePaper(assignment, { file, referenceText = "", avoid = [] } = {}) {
+async function generatePaper(assignment, { file, referenceText = "", avoid = [], meta } = {}) {
   const parts = [
     gemini.textPart(buildQuestionPaperPrompt(assignment, { hasFile: Boolean(file), referenceText, avoid })),
   ];
@@ -114,6 +115,7 @@ async function generatePaper(assignment, { file, referenceText = "", avoid = [] 
       system: QUESTION_PAPER_SYSTEM,
       schema: QUESTION_PAPER_SCHEMA,
       parts,
+      meta,
     });
     const result = normalizePaper(raw, assignment.questionTypes);
     const got = totalsOf(result.paper).totalQuestions;

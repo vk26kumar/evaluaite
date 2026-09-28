@@ -26,6 +26,7 @@ The teacher's paper details and additional instructions are preferences: follow 
 - Difficulty: "Easy" is recall or direct application; "Moderate" is explanation or multi-step application; "Challenging" is analysis, evaluation or an unfamiliar context. Aim for the overall split given in the task.
 - Everything must be factually correct. Do not invent statistics, dates, quotations or sources. Check every calculation.
 - Keep contexts inclusive, culturally neutral and appropriate for students.
+- Write maths and units with proper symbols, in questions and answers alike: 12 Ω, 24 V, 25 °C, 9.8 m/s², x², √2, π, ×, ÷, ≤, ≥, →. Never use ASCII stand-ins such as ohms, ^2, * or sqrt(). The paper prints these symbols correctly.
 
 ## When reference material is attached
 - Base every question on the material and don't test content outside it.
@@ -37,7 +38,7 @@ When no material is attached, set sourceNotes to an empty string.
 Every question gets an answer a teacher can mark against. It is used as the model answer when students' sheets are graded, so follow the answer style given for each question type exactly.
 
 ## General instructions
-generalInstructions: 3 to 5 short lines for the top of the paper, such as "All questions are compulsory." or "Section B has 5 short answer questions of 2 marks each." Don't mention the time allowed or maximum marks; the paper header shows them.`;
+generalInstructions: 3 to 5 short lines for the top of the paper, such as "All questions are compulsory." or "Section B has 5 short answer questions of 2 marks each." Don't mention the time allowed or maximum marks; the paper header shows them. Students answer on separate sheets, so never refer to answer spaces, boxes or lines on the paper.`;
 
 const QUESTION_PAPER_SCHEMA = {
   type: "object",

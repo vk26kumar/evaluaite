@@ -12,7 +12,8 @@
     "start": "node server.js",
     "dev": "nodemon --watch src --watch server.js server.js",
     "test": "node --test --test-reporter=spec \"test/*.test.js\"",
-    "smoke:grade": "node scripts/smoke-grade.js"
+    "smoke:grade": "node scripts/smoke-grade.js",
+    "smoke:paper": "node scripts/smoke-paper.js"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

@@ -46,11 +46,15 @@ async function runJob({ evaluationId, files }) {
   }));
 
   try {
+    const readMeta = {};
+    const gradeMeta = {};
     if (!(await setStatus(evaluationId, "reading"))) return;
-    const transcription = await transcribeSheet(keyQuestions, files);
+    const transcription = await transcribeSheet(keyQuestions, files, readMeta);
 
     if (!(await setStatus(evaluationId, "grading"))) return;
-    const { questions, overall } = await gradeTranscription(keyQuestions, transcription, evaluation.difficulty);
+    const { questions, overall } = await gradeTranscription(keyQuestions, transcription, evaluation.difficulty, gradeMeta);
+    // Record the models that actually did the work, in case a fallback was used.
+    const models = [...new Set([readMeta.model, gradeMeta.model].filter(Boolean))];
 
     // Keep the original sub-document ids so links to a question stay valid.
     const withIds = questions.map((q, index) => ({ ...q, _id: evaluation.questions[index]._id }));
@@ -63,7 +67,7 @@ async function runJob({ evaluationId, files }) {
           overall,
           status: "completed",
           failureReason: "",
-          model: gemini.modelName(),
+          model: models.join(" + ") || gemini.modelName(),
           completedAt: new Date(),
         },
       },

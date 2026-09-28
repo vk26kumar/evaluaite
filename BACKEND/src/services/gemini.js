@@ -32,8 +32,9 @@ function getClient() {
       httpOptions: {
         // Per attempt. Reading several handwritten pages can take a while.
         timeout: 120_000,
-        // Retries 408, 429 and 5xx responses with exponential backoff.
-        retryOptions: { attempts: 3, initialDelay: 2, maxDelay: 20 },
+        // Retries 408, 429 and 5xx once. Kept short because an overloaded model
+        // falls back to GEMINI_FALLBACK_MODEL, which is faster than waiting.
+        retryOptions: { attempts: 2, initialDelay: 1, maxDelay: 8 },
       },
     });
   }
@@ -103,32 +104,31 @@ const filePart = (buffer, mimeType) => ({
   inlineData: { data: buffer.toString("base64"), mimeType },
 });
 
-/**
- * Calls Gemini with a JSON schema and returns the parsed object.
- * Malformed or empty output is retried once, since it is usually transient.
- */
-async function generateJson({ label, system, parts, schema }) {
-  const ai = getClient();
+// Worth trying the next model: overloaded (503), rate-limited (429), server
+// error (500) or retired for this key (404). Anything else, such as a bad
+// request or blocked content, would fail the same way on every model.
+const FALLBACK_STATUSES = new Set([404, 429, 500, 503]);
+
+function modelChain() {
+  const { model, fallbackModel } = config.gemini;
+  return fallbackModel && fallbackModel !== model ? [model, fallbackModel] : [model];
+}
+
+/** One model; malformed or empty output is retried once, since it is usually transient. */
+async function generateWithModel(ai, model, { label, system, parts, schema }) {
   const maxAttempts = 2;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const startedAt = Date.now();
-    let response;
-
-    try {
-      response = await ai.models.generateContent({
-        model: config.gemini.model,
-        contents: [{ role: "user", parts }],
-        config: {
-          systemInstruction: system,
-          responseMimeType: "application/json",
-          responseJsonSchema: schema,
-        },
-      });
-    } catch (err) {
-      logger.warn("Gemini request failed", { label, status: err?.status, message: err?.message });
-      throw translateError(err);
-    }
+    const response = await ai.models.generateContent({
+      model,
+      contents: [{ role: "user", parts }],
+      config: {
+        systemInstruction: system,
+        responseMimeType: "application/json",
+        responseJsonSchema: schema,
+      },
+    });
 
     const candidate = response.candidates?.[0];
     const finishReason = candidate?.finishReason;
@@ -143,14 +143,14 @@ async function generateJson({ label, system, parts, schema }) {
     if (data && typeof data === "object" && finishReason !== "MAX_TOKENS") {
       logger.info("Gemini request completed", {
         label,
-        model: config.gemini.model,
+        model,
         ms: Date.now() - startedAt,
         tokens: response.usageMetadata?.totalTokenCount,
       });
       return data;
     }
 
-    logger.warn("Gemini returned unusable output", { label, attempt, finishReason, length: text?.length || 0 });
+    logger.warn("Gemini returned unusable output", { label, model, attempt, finishReason, length: text?.length || 0 });
   }
 
   throw new ApiError(502, "The AI service returned an incomplete answer. Please try again.", {
@@ -158,4 +158,45 @@ async function generateJson({ label, system, parts, schema }) {
   });
 }
 
-module.exports = { isConfigured, generateJson, textPart, filePart, translateError, modelName: () => config.gemini.model };
+/**
+ * Calls Gemini with a JSON schema and returns the parsed object. When the
+ * main model is overloaded or unavailable, the fallback model is used.
+ * Pass `meta` to learn which model produced the result (`meta.model`).
+ */
+async function generateJson({ label, system, parts, schema, meta }) {
+  const ai = getClient();
+  const models = modelChain();
+  let lastError;
+
+  for (const [index, model] of models.entries()) {
+    try {
+      const data = await generateWithModel(ai, model, { label, system, parts, schema });
+      if (meta) meta.model = model;
+      if (index > 0) logger.warn("Used the fallback Gemini model", { label, model, primary: models[0] });
+      return data;
+    } catch (err) {
+      lastError = err;
+      const status = Number(err?.status);
+      const fallingBack = !(err instanceof ApiError) && index < models.length - 1 && FALLBACK_STATUSES.has(status);
+      logger.warn("Gemini request failed", { label, model, status, message: err?.message, fallingBack });
+      if (!fallingBack) break;
+    }
+  }
+
+  throw translateError(lastError);
+}
+
+/** For tests: replace the SDK client. */
+function setClientForTests(fake) {
+  client = fake;
+}
+
+module.exports = {
+  isConfigured,
+  generateJson,
+  textPart,
+  filePart,
+  translateError,
+  modelName: () => config.gemini.model,
+  setClientForTests,
+};
