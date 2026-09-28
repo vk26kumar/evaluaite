@@ -1,0 +1,168 @@
+/*
+ * Design tokens: "Red Pen".
+ * Light theme is exam paper and ink; dark theme is a chalkboard.
+ * Components use only these variables, never raw values.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f4efe4;
+  --surface: #fffdf8;
+  --surface-2: #faf6ec;
+  --surface-3: #f0e9da;
+  --overlay: rgba(27, 33, 48, 0.42);
+
+  /* Text */
+  --ink: #1b2130;
+  --ink-2: #4a5263;
+  --ink-3: #676e80;
+  --ink-inverse: #fffdf8;
+
+  /* Lines */
+  --rule: #e3dacb;
+  --rule-strong: #cdc1ab;
+  --paper-line: rgba(47, 84, 196, 0.09);
+  --margin-line: rgba(194, 58, 44, 0.5);
+
+  /* Brand: the teacher's red pen */
+  --accent: #c23a2c;
+  --accent-hover: #a93124;
+  --accent-tint: #fbe9e5;
+  --accent-ink: #9e2f23;
+  --on-accent: #fffdf8;
+
+  /* Student's blue ink */
+  --blue: #2f54c4;
+  --blue-tint: #e8edfa;
+
+  /* Status: always paired with an icon and a label */
+  --good: #2b7a4b;
+  --good-tint: #e4f2e9;
+  --warn: #8f5b00;
+  --warn-tint: #fbefd6;
+  --bad: #b3261e;
+  --bad-tint: #fbe5e2;
+
+  /* Chart marks (validated with the dataviz checker) */
+  --chart-fill: #2f54c4;
+  --chart-track: #e4e9f7;
+
+  /* Effects */
+  --focus-ring: 0 0 0 3px rgba(194, 58, 44, 0.3);
+  --shadow-sm: 0 1px 0 rgba(27, 33, 48, 0.04), 0 1px 2px rgba(27, 33, 48, 0.06);
+  --shadow-md: 0 1px 0 rgba(27, 33, 48, 0.04), 0 12px 32px -14px rgba(27, 33, 48, 0.2);
+  --shadow-lg: 0 2px 0 rgba(27, 33, 48, 0.04), 0 28px 64px -24px rgba(27, 33, 48, 0.32);
+
+  /* Type */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+  --text-2xl: clamp(1.75rem, 1.35rem + 1.8vw, 2.5rem);
+  --text-3xl: clamp(2.2rem, 1.5rem + 3vw, 3.5rem);
+  --text-display: clamp(2.6rem, 1.4rem + 5.2vw, 5rem);
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-body: 1.6;
+
+  /* Space (4px grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 420ms;
+
+  /* Layout */
+  --container: 1180px;
+  --container-narrow: 760px;
+  --gutter: 16px;
+  --header-height: 64px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #111714;
+  --surface: #19211d;
+  --surface-2: #151c19;
+  --surface-3: #212b26;
+  --overlay: rgba(4, 8, 6, 0.64);
+
+  --ink: #ece7da;
+  --ink-2: #bec3b7;
+  --ink-3: #969e93;
+  --ink-inverse: #111714;
+
+  --rule: #2a3530;
+  --rule-strong: #3b4842;
+  --paper-line: rgba(236, 231, 218, 0.045);
+  --margin-line: rgba(240, 122, 103, 0.45);
+
+  --accent: #f07a67;
+  --accent-hover: #f5957f;
+  --accent-tint: #3a2420;
+  --accent-ink: #f8a898;
+  --on-accent: #1a0f0c;
+
+  --blue: #93adf5;
+  --blue-tint: #1f2a45;
+
+  --good: #7fcd9d;
+  --good-tint: #1b3326;
+  --warn: #e9b962;
+  --warn-tint: #3a2e17;
+  --bad: #f28b80;
+  --bad-tint: #3d2220;
+
+  --chart-fill: #6f8fea;
+  --chart-track: #27314a;
+
+  --focus-ring: 0 0 0 3px rgba(240, 122, 103, 0.38);
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 1px 0 rgba(0, 0, 0, 0.3), 0 16px 36px -16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 2px 0 rgba(0, 0, 0, 0.3), 0 32px 70px -24px rgba(0, 0, 0, 0.75);
+}
