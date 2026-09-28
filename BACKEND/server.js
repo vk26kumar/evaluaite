@@ -1,69 +1,54 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const passport = require("passport");
-const cookieParser = require("cookie-parser");
+const config = require("./src/config/env");
+const logger = require("./src/utils/logger");
+const { createApp } = require("./src/app");
+const { connectDatabase, disconnectDatabase } = require("./src/config/db");
+const jobs = require("./src/services/evaluation.jobs");
+const assignmentJobs = require("./src/services/assignment.jobs");
+const gemini = require("./src/services/gemini");
 
-require("./utils/passport");
+async function start() {
+  await connectDatabase();
+  await jobs.recoverInterruptedJobs();
+  await assignmentJobs.recoverInterruptedJobs();
 
-const evaluationRoutes = require("./routes/EvaluationRoute");
-const marksRoutes = require("./routes/MarksRoute");
-const authRoutes = require("./routes/authRoutes");
-const pptRoutes = require("./routes/pptRoutes");
+  const app = createApp();
+  const server = app.listen(config.port, () => {
+    logger.info(`Server listening on port ${config.port}`, {
+      env: config.nodeEnv,
+      clients: config.clientUrls,
+      ai: gemini.isConfigured() ? config.gemini.model : "not configured",
+      googleSignIn: config.google.enabled,
+    });
+  });
 
-const app = express();
+  let shuttingDown = false;
+  const shutdown = (signal) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    logger.info(`${signal} received, shutting down`);
+    server.close(async () => {
+      await disconnectDatabase().catch(() => {});
+      process.exit(0);
+    });
+    // Don't hang forever on open keep-alive connections.
+    setTimeout(() => process.exit(1), 10_000).unref();
+  };
 
-// ✅ Parse JSON
-app.use(express.json());
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+}
 
-// ✅ CORS Configuration
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true,
-}));
-
-app.use(cookieParser());
-
-// ✅ Sessions
-app.use(session({
-  secret: process.env.JWT_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false,
-  },
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-// ✅ MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Error:", err));
-
-// ✅ Routes
-app.use("/api/evaluations", evaluationRoutes);
-app.use("/api/data", marksRoutes);
-app.use("/api/auth", authRoutes); // ✅ login and signup
-app.use("/api/ppt", pptRoutes);
-
-// ✅ Unknown Route Handling
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled promise rejection", { error: logger.serializeError(reason) });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+process.on("uncaughtException", (err) => {
+  // State may be corrupt after an uncaught exception; exit and let the host restart us.
+  logger.error("Uncaught exception", { error: logger.serializeError(err) });
+  process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('🔥 Unhandled Rejection:', reason);
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('🔥 Uncaught Exception:', err);
+start().catch((err) => {
+  logger.error("Failed to start server", { error: logger.serializeError(err) });
+  process.exit(1);
 });
