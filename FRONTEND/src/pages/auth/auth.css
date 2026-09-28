@@ -91,6 +91,16 @@
   font-weight: 600;
 }
 
+.auth-legal {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.auth-legal a {
+  color: var(--ink-2);
+}
+
 .auth-divider {
   display: flex;
   align-items: center;

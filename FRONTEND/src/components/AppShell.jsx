@@ -223,10 +223,15 @@ function Footer() {
           <Logo />
           <p>AI-assisted marking for handwritten answer sheets. The teacher always has the final say.</p>
         </div>
-        <p className="footer-meta">
+        <div className="footer-meta">
           <span className="hand">marked with care</span>
+          {/* Static pages served from /public, outside the hash router. */}
+          <nav className="footer-links" aria-label="Legal">
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms of Service</a>
+          </nav>
           <span>© {new Date().getFullYear()} AI-EvaluAIte</span>
-        </p>
+        </div>
       </div>
     </footer>
   );

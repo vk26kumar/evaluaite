@@ -146,6 +146,10 @@ export default function Signup() {
         <button type="submit" className="btn btn-primary btn-lg btn-block" data-loading={submitting || undefined}>
           Create account
         </button>
+        <p className="auth-legal">
+          By creating an account, you agree to the <a href="/terms.html">Terms of Service</a> and{" "}
+          <a href="/privacy.html">Privacy Policy</a>.
+        </p>
       </form>
     </AuthLayout>
   );

@@ -298,6 +298,22 @@
   font-size: var(--text-xs);
 }
 
+.footer-links {
+  display: flex;
+  gap: var(--space-4);
+  margin: var(--space-1) 0;
+}
+
+.footer-links a {
+  color: var(--ink-2);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
 .footer-meta .hand {
   color: var(--accent);
   font-size: 1.35rem;
