@@ -24,6 +24,8 @@ const schema = z.object({
   // Legacy name used by earlier versions of this project.
   GEMINI_API: optionalString,
   GEMINI_MODEL: z.string().trim().default("gemini-flash-latest"),
+  // Used when the main model is overloaded or unavailable. Set it empty to turn fallback off.
+  GEMINI_FALLBACK_MODEL: z.string().trim().default("gemini-flash-lite-latest"),
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   TRUST_PROXY: optionalString,
@@ -90,6 +92,7 @@ module.exports = {
   gemini: {
     apiKey: env.GEMINI_API_KEY || env.GEMINI_API,
     model: env.GEMINI_MODEL,
+    fallbackModel: env.GEMINI_FALLBACK_MODEL,
   },
   google: {
     enabled: googleEnabled,

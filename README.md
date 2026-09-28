@@ -66,6 +66,7 @@ In development, the Vite dev server proxies `/api` to `http://localhost:5000`.
 ```bash
 cd BACKEND  && npm test               # unit + HTTP tests, no database or API key needed
 cd BACKEND  && npm run smoke:grade    # grades test/fixtures/sample-answer-sheet.jpg with the real Gemini API
+cd BACKEND  && npm run smoke:paper    # generates a real question paper and writes both PDFs to your temp folder
 cd FRONTEND && npm run lint && npm run build
 ```
 
@@ -79,6 +80,7 @@ cd FRONTEND && npm run lint && npm run build
 | `JWT_SECRET` | yes | Session signing secret. **At least 32 characters in production**, or the server refuses to start. |
 | `GEMINI_API_KEY` | for AI | Google AI Studio key. `GEMINI_API` is accepted as a legacy name. |
 | `GEMINI_MODEL` | no | Defaults to `gemini-flash-latest`. Pin a specific model if marks must stay identical across model releases. |
+| `GEMINI_FALLBACK_MODEL` | no | Defaults to `gemini-flash-lite-latest`. Used automatically when the main model is overloaded (503), rate-limited (429) or unavailable; the model that did the work is saved with each result. Set empty to disable. |
 | `CLIENT_URL` | yes in prod | Allowed browser origin(s), comma-separated. The first one is where Google sign-in returns to. |
 | `SERVER_URL` | for Google | Public URL of the API, used for the OAuth callback. On Render it defaults to `RENDER_EXTERNAL_URL`. |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Enables "Continue with Google". |

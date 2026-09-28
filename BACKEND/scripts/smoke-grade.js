@@ -42,11 +42,14 @@ async function main() {
   console.log(`Model: ${config.gemini.model} | Strictness: ${difficulty}\n`);
 
   console.time("transcribe");
-  const transcription = await transcribeSheet(answerKey, [{ buffer, mimeType: "image/jpeg" }]);
+  const readMeta = {};
+  const transcription = await transcribeSheet(answerKey, [{ buffer, mimeType: "image/jpeg" }], readMeta);
   console.timeEnd("transcribe");
 
   console.time("grade");
-  const result = await gradeTranscription(answerKey, transcription, difficulty);
+  const gradeMeta = {};
+  const result = await gradeTranscription(answerKey, transcription, difficulty, gradeMeta);
+  console.log(`Models used: read=${readMeta.model}, grade=${gradeMeta.model}`);
   console.timeEnd("grade");
 
   for (const [index, q] of result.questions.entries()) {

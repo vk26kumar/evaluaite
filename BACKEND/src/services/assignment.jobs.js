@@ -39,10 +39,12 @@ async function runJob({ assignmentId, file, referenceText, regenerate }) {
     const avoid = regenerate
       ? assignment.paper.sections.flatMap((section) => section.questions.map((q) => q.text)).slice(0, 60)
       : [];
+    const meta = {};
     const result = await generatePaper(assignment.toObject(), {
       file,
       referenceText: referenceText || assignment.reference?.notes || "",
       avoid,
+      meta,
     });
 
     const update = {
@@ -51,7 +53,7 @@ async function runJob({ assignmentId, file, referenceText, regenerate }) {
       paper: result.paper,
       totalQuestions: result.totalQuestions,
       totalMarks: result.totalMarks,
-      model: gemini.modelName(),
+      model: meta.model || gemini.modelName(),
       generatedAt: new Date(),
     };
     if (result.sourceNotes) update["reference.notes"] = result.sourceNotes;
