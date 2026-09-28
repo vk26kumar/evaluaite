@@ -8,7 +8,7 @@ export default [
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest',
       globals: globals.browser,
       parserOptions: {
         ecmaVersion: 'latest',
@@ -23,11 +23,17 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Capitalised names are components used in JSX, which core ESLint can't see,
+      // including ones renamed while destructuring (`icon: Icon`).
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' }],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
     },
+  },
+  {
+    files: ['vite.config.js'],
+    languageOptions: { globals: globals.node },
   },
 ]
