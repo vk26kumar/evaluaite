@@ -21,7 +21,6 @@ function toApiError(err) {
     return ApiError.badRequest("The upload could not be processed.");
   }
 
-  // Raised by express.json()
   if (err.type === "entity.parse.failed") return ApiError.badRequest("Request body is not valid JSON.");
   if (err.type === "entity.too.large") return new ApiError(413, "Request body is too large.");
 
@@ -43,7 +42,7 @@ function errorHandler(err, req, res, next) {
   const status = apiError?.status || 500;
 
   if (status >= 500) {
-    logger.error("Request failed", { method: req.method, path: req.originalUrl, error: logger.serializeError(err) });
+    logger.error("Request failed", { id: req.id, method: req.method, path: req.originalUrl.split("?")[0], error: logger.serializeError(err) });
   }
 
   if (res.headersSent) return;
@@ -53,6 +52,7 @@ function errorHandler(err, req, res, next) {
       message: apiError ? apiError.message : "Something went wrong on our side. Please try again.",
       code: apiError ? apiError.code : "INTERNAL_ERROR",
       ...(apiError?.details ? { details: apiError.details } : {}),
+      ...(status >= 500 && req.id ? { requestId: req.id } : {}),
     },
   });
 }

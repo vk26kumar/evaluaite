@@ -1,5 +1,4 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const { z } = require("zod");
 const config = require("../config/env");
@@ -8,30 +7,32 @@ const AuthCode = require("../models/AuthCode");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const logger = require("../utils/logger");
+const { passwordSchema, assertNotPersonal, hashPassword, verifyPassword, DUMMY_HASH } = require("../utils/password");
 const { validateBody } = require("../middleware/validate");
 const { requireAuth } = require("../middleware/auth");
-const { authLimiter } = require("../middleware/rateLimit");
+const {
+  signupLimiter,
+  loginLimiter,
+  linkLimiter,
+  loginAccountLimiter,
+  emailRequestLimiter,
+  emailAddressLimiter,
+} = require("../middleware/rateLimit");
 const { signSessionToken, randomToken, sha256 } = require("../services/token.service");
 const { logActivity } = require("../services/activity");
+const accountEmail = require("../services/accountEmail.service");
 
 const router = express.Router();
 
-const BCRYPT_ROUNDS = 12;
 const AUTH_CODE_TTL_MS = 60 * 1000;
-// Compared against when an email is unknown, so a miss takes as long as a hit
-// and response timing doesn't reveal which emails have accounts.
-const DUMMY_HASH = bcrypt.hashSync("timing-safe-placeholder", BCRYPT_ROUNDS);
 
 const email = z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address.")).pipe(z.string().max(254));
+const token = z.string().min(20).max(200);
 
 const signupSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters.").max(80, "Name is too long."),
   email,
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters.")
-    .max(128, "Password must be at most 128 characters.")
-    .refine((value) => /[A-Za-z]/.test(value) && /\d/.test(value), "Use at least one letter and one number."),
+  password: passwordSchema,
 });
 
 const loginSchema = z.object({
@@ -39,7 +40,12 @@ const loginSchema = z.object({
   password: z.string().min(1, "Enter your password.").max(128),
 });
 
-const exchangeSchema = z.object({ code: z.string().min(20).max(200) });
+const exchangeSchema = z.object({ code: token });
+const forgotSchema = z.object({ email });
+const resetSchema = z.object({ token, password: passwordSchema });
+const verifySchema = z.object({ token });
+
+const LINK_EXPIRED = "This link has expired or was already used. Request a new one.";
 
 function session(user) {
   void user.recordLogin().catch(() => {});
@@ -50,48 +56,105 @@ function redirectToClient(res, path) {
   res.redirect(`${config.clientUrl}/#${path}`);
 }
 
+function requireEmail() {
+  if (!accountEmail.isEnabled()) {
+    throw ApiError.unavailable("Email isn't set up on this server yet. Contact the administrator.", "EMAIL_NOT_CONFIGURED");
+  }
+}
+
 router.get("/providers", (req, res) => {
-  res.json({ google: config.google.enabled });
+  res.json({ google: config.google.enabled, email: accountEmail.isEnabled() });
 });
 
 router.post(
   "/signup",
-  authLimiter,
+  signupLimiter,
   validateBody(signupSchema),
   asyncHandler(async (req, res) => {
     const { name, email: address, password } = req.body;
+    assertNotPersonal(password, address);
 
     if (await User.findByEmail(address)) {
       throw ApiError.conflict("An account with this email already exists. Sign in instead.");
     }
 
-    const user = await User.create({
-      name,
-      email: address,
-      password: await bcrypt.hash(password, BCRYPT_ROUNDS),
-    });
+    const user = await User.create({ name, email: address, password: await hashPassword(password) });
 
     void logActivity(user, "account.created", { kind: "account", meta: { method: "password" } });
+    accountEmail.inBackground(() => accountEmail.sendVerification(user));
     res.status(201).json(session(user));
   })
 );
 
 router.post(
   "/login",
-  authLimiter,
+  loginLimiter,
   validateBody(loginSchema),
+  loginAccountLimiter,
   asyncHandler(async (req, res) => {
     const { email: address, password } = req.body;
     const user = await User.findByEmail(address, { withPassword: true });
 
     if (user && !user.password) {
-      throw ApiError.badRequest("This account uses Google sign-in. Continue with Google instead.");
+      throw ApiError.badRequest("This account uses Google sign-in. Continue with Google, or reset your password to add one.");
     }
 
-    const matches = await bcrypt.compare(password, user?.password || DUMMY_HASH);
+    const matches = await verifyPassword(password, user?.password || DUMMY_HASH);
     if (!user || !matches) throw ApiError.unauthorized("Incorrect email or password.");
 
     res.json(session(user));
+  })
+);
+
+router.post(
+  "/password/forgot",
+  emailRequestLimiter,
+  validateBody(forgotSchema),
+  emailAddressLimiter,
+  asyncHandler(async (req, res) => {
+    requireEmail();
+    const user = await User.findByEmail(req.body.email);
+    if (user) accountEmail.inBackground(() => accountEmail.sendPasswordReset(user));
+    res.json({ message: "If an account exists for that email, we've sent a link to reset the password." });
+  })
+);
+
+router.post(
+  "/password/reset",
+  linkLimiter,
+  validateBody(resetSchema),
+  asyncHandler(async (req, res) => {
+    const pending = await accountEmail.findToken(req.body.token, "password_reset");
+    const user = pending && (await User.findById(pending.user).select("+password"));
+    if (!user) throw ApiError.badRequest(LINK_EXPIRED, [{ field: "token", message: LINK_EXPIRED }]);
+
+    assertNotPersonal(req.body.password, user.email);
+    if (!(await accountEmail.consumeToken(req.body.token, "password_reset"))) {
+      throw ApiError.badRequest(LINK_EXPIRED, [{ field: "token", message: LINK_EXPIRED }]);
+    }
+
+    user.password = await hashPassword(req.body.password);
+    user.emailVerified = true;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await user.save();
+
+    void logActivity(user, "account.password_reset", { kind: "account" });
+    accountEmail.inBackground(() => accountEmail.sendPasswordChanged(user));
+    res.json(session(user));
+  })
+);
+
+router.post(
+  "/email/verify",
+  linkLimiter,
+  validateBody(verifySchema),
+  asyncHandler(async (req, res) => {
+    const record = await accountEmail.consumeToken(req.body.token, "email_verification");
+    if (!record) throw ApiError.badRequest(LINK_EXPIRED, [{ field: "token", message: LINK_EXPIRED }]);
+
+    await User.updateOne({ _id: record.user }, { $set: { emailVerified: true } });
+    void logActivity(record.user, "account.email_verified", { kind: "account" });
+    res.json({ verified: true });
   })
 );
 
@@ -117,8 +180,6 @@ router.get("/google/callback", (req, res, next) => {
       return redirectToClient(res, "/login?error=google");
     }
     try {
-      // Hand the browser a one-time code instead of the session token, so the
-      // token never lands in browser history, proxies or server logs.
       const code = randomToken(32);
       await AuthCode.create({
         codeHash: sha256(code),
@@ -135,7 +196,7 @@ router.get("/google/callback", (req, res, next) => {
 
 router.post(
   "/google/exchange",
-  authLimiter,
+  linkLimiter,
   validateBody(exchangeSchema),
   asyncHandler(async (req, res) => {
     const record = await AuthCode.findOneAndDelete({

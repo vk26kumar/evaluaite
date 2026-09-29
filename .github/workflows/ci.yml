@@ -26,7 +26,6 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: BACKEND/package-lock.json
-      # The database tests start a throwaway MongoDB; keep its binary between runs.
       - name: Cache the MongoDB test binary
         uses: actions/cache@v4
         with:
@@ -34,6 +33,7 @@ jobs:
           key: mongodb-${{ runner.os }}-${{ hashFiles('BACKEND/package-lock.json') }}
       - run: echo "MONGOMS_DOWNLOAD_DIR=$HOME/.cache/mongodb-binaries" >> "$GITHUB_ENV"
       - run: npm ci
+      - run: npm run lint
       - run: npm test
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high

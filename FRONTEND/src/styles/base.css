@@ -1,5 +1,3 @@
-/* Reset, typography and layout primitives. */
-
 *,
 *::before,
 *::after {
@@ -104,8 +102,6 @@ p {
   flex-direction: column;
 }
 
-/* Layout ------------------------------------------------------------------ */
-
 .container {
   width: 100%;
   max-width: calc(var(--container) + var(--gutter) * 2);
@@ -132,8 +128,6 @@ p {
   flex: 1;
 }
 
-/* Text helpers ------------------------------------------------------------ */
-
 .eyebrow {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
@@ -152,10 +146,6 @@ p {
 
 .muted {
   color: var(--ink-3);
-}
-
-.secondary {
-  color: var(--ink-2);
 }
 
 .mono {
@@ -194,8 +184,6 @@ p {
   top: var(--space-4);
 }
 
-/* Paper textures ------------------------------------------------------------ */
-
 .ruled {
   background-image: repeating-linear-gradient(
     to bottom,
@@ -220,8 +208,6 @@ p {
   background: var(--margin-line);
   pointer-events: none;
 }
-
-/* Motion -------------------------------------------------------------------- */
 
 @keyframes fade-up {
   from {
@@ -270,8 +256,6 @@ p {
     scroll-behavior: auto !important;
   }
 }
-
-/* Scrollbars -------------------------------------------------------------- */
 
 * {
   scrollbar-width: thin;

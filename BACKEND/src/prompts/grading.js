@@ -1,13 +1,5 @@
 const { fence, escapeAttribute, DATA_NOT_INSTRUCTIONS } = require("./shared");
 
-/**
- * Pass 2 of grading: compare transcribed answers with the teacher's key.
- *
- * The rubric makes the model break each reference answer into weighted key
- * points before it awards marks. Grading against an explicit checklist is
- * more consistent across runs than holistic scoring, and the checklist is
- * shown to the teacher so they can see why a mark was given.
- */
 const STRICTNESS = {
   Easy: {
     label: "Lenient",
@@ -110,11 +102,6 @@ const GRADING_SCHEMA = {
   required: ["questions", "overall", "integrityFlags"],
 };
 
-/**
- * @param {Array<{question: string, referenceAnswer: string, maxMarks: number}>} questions
- * @param {Array<{found: boolean, legibility: string, transcription: string}>} answers aligned with questions
- * @param {"Easy"|"Medium"|"Tough"} difficulty
- */
 function buildGradingPrompt(questions, answers, difficulty) {
   const strictness = STRICTNESS[difficulty] || STRICTNESS.Medium;
 
@@ -140,4 +127,4 @@ Mark the following ${questions.length} question${questions.length === 1 ? "" : "
 ${blocks}`;
 }
 
-module.exports = { GRADING_SYSTEM, GRADING_SCHEMA, STRICTNESS, buildGradingPrompt };
+module.exports = { GRADING_SYSTEM, GRADING_SCHEMA, buildGradingPrompt };

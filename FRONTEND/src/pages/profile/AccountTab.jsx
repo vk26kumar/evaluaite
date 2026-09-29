@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { LuCheck, LuEye, LuEyeOff, LuKeyRound, LuLogOut, LuTriangleAlert, LuX } from "react-icons/lu";
+import { LuCheck, LuEye, LuEyeOff, LuKeyRound, LuLogOut, LuMail, LuTriangleAlert, LuX } from "react-icons/lu";
 import { api } from "../../lib/api";
+import { useProviders } from "../../lib/providers";
 import { useAuth, useToast } from "../../context/contexts";
 import Field from "../../components/Field";
 
@@ -167,7 +167,6 @@ function PasswordForm({ hasPassword, onChanged }) {
         currentPassword: hasPassword ? values.currentPassword : undefined,
         newPassword: values.newPassword,
       });
-      // The server signed out every other session; this device keeps going with a fresh token.
       signIn({ token, user });
       toast.success(
         hasPassword
@@ -250,13 +249,40 @@ function SignOutOtherDevices() {
   );
 }
 
-function DeleteAccount() {
+function ConfirmEmail() {
+  const toast = useToast();
+  const { email } = useProviders();
+  const [state, setState] = useState("idle");
+
+  if (!email) return <span className="badge">Not confirmed</span>;
+  if (state === "sent") return <span className="badge">Link sent</span>;
+
+  const send = async () => {
+    setState("sending");
+    try {
+      await api.post("/api/profile/email/verification");
+      setState("sent");
+      toast.success("Confirmation link sent. Check your inbox and spam folder.");
+    } catch (err) {
+      setState("idle");
+      toast.error(err.message);
+    }
+  };
+
+  return (
+    <button type="button" className="btn btn-sm" onClick={send} data-loading={state === "sending" || undefined}>
+      Send confirmation link
+    </button>
+  );
+}
+
+function DeleteAccount({ hasPassword }) {
   const { signOut } = useAuth();
   const toast = useToast();
-  const navigate = useNavigate();
   const dialog = useRef(null);
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -268,10 +294,9 @@ function DeleteAccount() {
   const remove = async () => {
     setBusy(true);
     try {
-      await api.delete("/api/profile", { body: { confirm: typed } });
-      signOut();
+      await api.delete("/api/profile", { body: { confirm: typed, password: hasPassword ? password : undefined } });
+      signOut("/");
       toast.success("Your account and all its data have been deleted.");
-      navigate("/", { replace: true });
     } catch (err) {
       toast.error(err.message);
       setBusy(false);
@@ -308,12 +333,18 @@ function DeleteAccount() {
             <span className="field-label">Type DELETE to confirm</span>
             <input className="input" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" autoFocus />
           </label>
+          {hasPassword && (
+            <label className="field" style={{ marginTop: 12 }}>
+              <span className="field-label">Your password</span>
+              <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+            </label>
+          )}
         </div>
         <div className="dialog-actions">
           <button type="button" className="btn btn-ghost" onClick={() => setOpen(false)} disabled={busy}>
             Cancel
           </button>
-          <button type="button" className="btn btn-danger" onClick={remove} disabled={typed !== "DELETE"} data-loading={busy || undefined}>
+          <button type="button" className="btn btn-danger" onClick={remove} disabled={typed !== "DELETE" || (hasPassword && !password)} data-loading={busy || undefined}>
             Delete everything
           </button>
         </div>
@@ -335,6 +366,11 @@ export default function AccountTab({ user, onUserChange }) {
         </div>
         <ul className="method-list">
           <li>
+            <LuMail aria-hidden="true" />
+            <span>Email address</span>
+            {user.emailVerified ? <span className="badge badge-good">Confirmed</span> : <ConfirmEmail />}
+          </li>
+          <li>
             <LuKeyRound aria-hidden="true" />
             <span>Email and password</span>
             <span className={`badge ${methods.password ? "badge-good" : ""}`}>{methods.password ? "On" : "Not set"}</span>
@@ -349,7 +385,7 @@ export default function AccountTab({ user, onUserChange }) {
       </section>
 
       <PasswordForm hasPassword={Boolean(methods.password)} onChanged={onUserChange} />
-      <DeleteAccount />
+      <DeleteAccount hasPassword={Boolean(methods.password)} />
     </div>
   );
 }

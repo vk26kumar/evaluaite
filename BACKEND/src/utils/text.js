@@ -1,5 +1,3 @@
-/** Small, dependency-free helpers for cleaning model output. */
-
 function cleanString(value, maxLength = 2000) {
   if (typeof value !== "string") return "";
   const trimmed = value.replace(/\r\n/g, "\n").trim();
@@ -25,7 +23,6 @@ function pickEnum(value, allowed, fallback) {
   return allowed.includes(value) ? value : fallback;
 }
 
-/** Rounds to the nearest half mark and clamps into [0, max]. */
 function roundToHalf(value, max) {
   const number = Number(value);
   if (!Number.isFinite(number)) return 0;

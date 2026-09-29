@@ -8,7 +8,6 @@ export function useDocumentTitle(title) {
   }, [title]);
 }
 
-/** Warns before leaving the page while `when` is true (e.g. unsaved work). */
 export function useBeforeUnload(when) {
   useEffect(() => {
     if (!when) return undefined;

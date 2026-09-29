@@ -51,15 +51,21 @@
 .history-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px var(--space-2);
+  gap: 2px var(--space-4);
   margin-top: 2px;
+  overflow: hidden;
   color: var(--ink-3);
   font-size: var(--text-xs);
 }
 
-.history-meta span + span::before {
+.history-meta span {
+  position: relative;
+}
+
+.history-meta span::before {
   content: "·";
-  margin-right: var(--space-2);
+  position: absolute;
+  left: calc(var(--space-4) / -2 - 0.2em);
 }
 
 .history-score {

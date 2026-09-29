@@ -46,8 +46,6 @@
   }
 }
 
-/* Dropzone ----------------------------------------------------------------- */
-
 .dropzone {
   display: grid;
   justify-items: center;
@@ -270,8 +268,6 @@
   background: var(--bad);
 }
 
-/* Answer key --------------------------------------------------------------- */
-
 .question-list {
   display: grid;
   gap: var(--space-4);
@@ -475,8 +471,6 @@
   }
 }
 
-/* Strictness --------------------------------------------------------------- */
-
 .strictness {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -575,8 +569,6 @@
     grid-template-columns: 1fr;
   }
 }
-
-/* Sticky submit bar ------------------------------------------------------ */
 
 .submit-bar {
   position: sticky;

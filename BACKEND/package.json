@@ -14,7 +14,8 @@
     "test": "node --test --test-reporter=spec \"test/*.test.js\"",
     "smoke:grade": "node scripts/smoke-grade.js",
     "smoke:paper": "node scripts/smoke-paper.js",
-    "cleanup:legacy": "node scripts/cleanup-legacy-data.js"
+    "cleanup:legacy": "node scripts/cleanup-legacy-data.js",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
@@ -34,6 +35,9 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^16.5.0",
     "mongodb-memory-server-core": "^11.3.0",
     "nodemon": "^3.1.14"
   },

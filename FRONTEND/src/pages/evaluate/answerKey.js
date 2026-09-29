@@ -9,7 +9,6 @@ export function newQuestion(values = {}) {
   return { id: `q-${Date.now().toString(36)}-${nextId}`, question: "", referenceAnswer: "", maxMarks: 5, ...values };
 }
 
-/** Turns questions from a saved evaluation back into editable ones. */
 export function fromEvaluation(evaluation) {
   return {
     title: evaluation.title,
@@ -21,11 +20,6 @@ export function fromEvaluation(evaluation) {
   };
 }
 
-/**
- * Builds a grading answer key from a generated question paper. Options are
- * kept in the question text so the grader knows what "B" means, and the
- * paper's answer becomes the model answer.
- */
 export function fromAssignment(assignment) {
   const letters = ["A", "B", "C", "D"];
   return {
@@ -82,7 +76,6 @@ export function clearDraft() {
   writeStorage(DRAFT_KEY, null);
 }
 
-/** Mirrors the server's rules so problems show up before uploading. */
 export function validate({ title, questions, pages, totalBytes, maxTotalBytes }) {
   const errors = { questions: {} };
 

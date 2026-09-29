@@ -124,7 +124,6 @@ router.post(
     }
     const data = parseOrThrow(createSchema, payload);
 
-    // A key built from a generated paper links the sheet to that paper.
     let assignmentId = null;
     if (data.assignmentId) {
       const linked = mongoose.isValidObjectId(data.assignmentId)

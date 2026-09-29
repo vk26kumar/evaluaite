@@ -15,7 +15,6 @@ export default function ToastProvider({ children }) {
     (tone, message, { duration } = {}) => {
       nextId.current += 1;
       const id = nextId.current;
-      // Keep at most three on screen; the oldest goes first.
       setToasts((list) => [...list.slice(-2), { id, tone, message }]);
       setTimeout(() => dismiss(id), duration || DURATION[tone]);
       return id;

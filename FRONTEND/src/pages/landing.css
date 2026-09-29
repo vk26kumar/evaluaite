@@ -1,12 +1,9 @@
-/* Hero --------------------------------------------------------------------- */
-
 .hero {
   position: relative;
   padding-block: var(--space-12) var(--space-20);
   overflow: hidden;
 }
 
-/* Faint dot grid, like a teacher's planning pad. */
 .hero::before {
   content: "";
   position: absolute;
@@ -92,8 +89,6 @@
   color: var(--accent);
 }
 
-/* Hero sheet ------------------------------------------------------------- */
-
 .hero-visual {
   position: relative;
   padding: var(--space-6) var(--space-4) var(--space-16) var(--space-8);
@@ -104,7 +99,6 @@
   --margin-x: 44px;
   position: relative;
   padding: var(--space-6) var(--space-6) 120px 64px;
-  /* `rotate`, not `transform`, so the entrance animation does not cancel it. */
   rotate: 1.2deg;
   animation: fade-up 700ms var(--ease-out) both;
 }
@@ -256,8 +250,6 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Sections ----------------------------------------------------------------- */
-
 .section {
   padding-block: var(--space-20);
 }
@@ -378,12 +370,6 @@
   font-size: var(--text-sm);
 }
 
-.extras {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-5);
-}
-
 .cta {
   --line-gap: 36px;
   --margin-x: 36px;
@@ -403,8 +389,6 @@
   margin-top: var(--space-2);
   color: var(--ink-2);
 }
-
-/* Responsive ------------------------------------------------------------ */
 
 @media (max-width: 1023px) {
   .hero-grid {
@@ -435,8 +419,7 @@
   }
 
   .steps,
-  .features,
-  .extras {
+  .features {
     grid-template-columns: 1fr;
   }
 
@@ -483,8 +466,6 @@
     padding: var(--space-8) var(--space-5) var(--space-8) 56px;
   }
 }
-
-/* Question paper promo ----------------------------------------------------- */
 
 .paper-promo {
   display: grid;
@@ -580,8 +561,6 @@
   font-size: 1.2rem;
   color: var(--accent);
 }
-
-/* Tools grid ---------------------------------------------------------------- */
 
 .tools-grid {
   display: grid;

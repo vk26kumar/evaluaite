@@ -2,12 +2,6 @@ import { useState } from "react";
 import { LuChartBar, LuTable } from "react-icons/lu";
 import { formatMarks, formatPercent } from "../../lib/format";
 
-/**
- * Marks by question, one meter per question. A single series, so no legend:
- * the title says what is plotted. Each question's bar is its share of the
- * marks available, so questions worth different marks compare fairly.
- * Values are also in the table view and in each question card.
- */
 export default function ScoreChart({ questions, onSelect }) {
   const [view, setView] = useState("chart");
   const [tip, setTip] = useState(null);

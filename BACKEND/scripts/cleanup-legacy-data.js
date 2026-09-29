@@ -1,27 +1,3 @@
-/**
- * One-off cleanup of data left behind by the old version of the app.
- *
- *   npm run cleanup:legacy -- --db test                        report only, changes nothing
- *   npm run cleanup:legacy -- --db test --apply                back up, then clean up
- *   npm run cleanup:legacy -- --db test --apply --remove-user <id>
- *   npm run cleanup:legacy -- --db test --restore backups/<file>.json
- *
- * Production data lives in the "test" database, the driver's default, because
- * its MONGO_URI names none. The name is required so a local run can't clean
- * the wrong database by accident.
- *
- * What it cleans up:
- * - Graded sheets with no owner. The old version didn't link sheets to
- *   accounts, so nobody can open them in the app.
- * - Emails saved with capital letters are lowercased, unless another account
- *   already uses the lowercase form.
- * - Two accounts with the same email in different cases are listed in the
- *   report. Pass --remove-user with the id of the one to remove: its papers,
- *   sheets and history move to the other account, then it is deleted.
- *
- * Everything it deletes or changes is saved to BACKEND/backups/ first, and
- * --restore puts it back.
- */
 const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
@@ -53,7 +29,6 @@ function maskEmail(email) {
 
 const day = (date) => (date ? new Date(date).toISOString().slice(0, 10) : "never");
 
-/** Works out what would change, without changing anything. */
 async function plan(db) {
   const users = db.collection("users");
   const evaluations = db.collection("evaluations");
@@ -97,7 +72,6 @@ async function plan(db) {
       .toArray()
   ).filter((user) => !duplicateEmails.has(user.email.toLowerCase()));
 
-  // Linked to Google before linking removed unverified passwords. Shown for review only.
   const linkedWithPassword = await users.countDocuments({
     googleId: { $exists: true, $ne: null },
     password: { $exists: true, $nin: [null, ""] },
@@ -135,7 +109,6 @@ function printReport(db, found, log) {
   }
 }
 
-/** Saves everything that will be deleted or changed, then makes the changes. Returns the backup's path. */
 async function apply(db, found, { removeUser } = {}) {
   const users = db.collection("users");
   const backup = {
@@ -196,12 +169,10 @@ async function apply(db, found, { removeUser } = {}) {
   return file;
 }
 
-/** Puts back everything a backup recorded. Documents that exist again are left alone. */
 async function restore(db, file) {
   const backup = EJSON.parse(fs.readFileSync(file, "utf8"), { relaxed: false });
   const counts = {};
 
-  // Emails first, so a re-inserted account can't collide with one that was lowercased.
   for (const { _id, from } of backup.emailsLowercased) {
     await db.collection("users").updateOne({ _id }, { $set: { email: from } });
   }

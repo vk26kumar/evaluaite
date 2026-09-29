@@ -39,7 +39,6 @@ const QuestionSchema = new mongoose.Schema({
 const EvaluationSchema = new mongoose.Schema(
   {
     owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    // Set when the answer key came from a generated question paper.
     assignment: { type: mongoose.Schema.Types.ObjectId, ref: "Assignment", default: null },
     title: { type: String, trim: true, required: true, maxlength: 120 },
     studentName: { type: String, trim: true, default: "", maxlength: 120 },
@@ -132,7 +131,4 @@ const Evaluation = mongoose.model("Evaluation", EvaluationSchema);
 module.exports = Evaluation;
 module.exports.DIFFICULTIES = DIFFICULTIES;
 module.exports.IN_PROGRESS = IN_PROGRESS;
-module.exports.LEGIBILITY = LEGIBILITY;
-module.exports.CONFIDENCE = CONFIDENCE;
-module.exports.COVERAGE = COVERAGE;
 module.exports.summarizeScores = summarizeScores;

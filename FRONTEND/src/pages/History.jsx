@@ -59,7 +59,6 @@ export default function History() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
 
-  // A silent load refreshes in place without showing the loading skeleton.
   const load = useCallback(async (nextPage, { signal, silent = false } = {}) => {
     if (!silent) setStatus(nextPage === 1 ? "loading" : "more");
     try {
@@ -82,7 +81,6 @@ export default function History() {
     return () => controller.abort();
   }, [load]);
 
-  // Refresh while anything on screen is still being graded.
   const grading = items.some((item) => IN_PROGRESS.includes(item.status));
   useEffect(() => {
     if (!grading) return undefined;

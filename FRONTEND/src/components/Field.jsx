@@ -1,10 +1,6 @@
 import { useId } from "react";
 import { LuCircleAlert } from "react-icons/lu";
 
-/**
- * Label + control + hint + error, wired together for screen readers.
- * The render prop receives the props the control needs.
- */
 export default function Field({ label, hint, error, optional, aside, children }) {
   const id = useId();
   const hintId = hint ? `${id}-hint` : undefined;

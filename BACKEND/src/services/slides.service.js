@@ -4,8 +4,6 @@ const { cleanString, cleanList } = require("../utils/text");
 const gemini = require("./gemini");
 const { SLIDES_SYSTEM, SLIDES_SCHEMA, buildSlidesPrompt } = require("../prompts/slides");
 
-// The deck uses the product's exam-paper look: warm paper, ink text and a red
-// margin rule, set in fonts that every copy of PowerPoint and Keynote has.
 const THEME = {
   paper: "F7F2E8",
   ink: "1C2230",
@@ -57,10 +55,9 @@ function marginRule(slide) {
   slide.addShape("line", { x: 0.9, y: 0, w: 0, h: 7.5, line: { color: THEME.red, width: 1.25 } });
 }
 
-/** Builds a .pptx file in memory and returns it as a Buffer. */
 async function buildDeck(outline) {
   const pptx = new PptxGenJS();
-  pptx.layout = "LAYOUT_WIDE"; // 13.33 x 7.5 in, 16:9
+  pptx.layout = "LAYOUT_WIDE";
   pptx.title = outline.title;
   pptx.subject = outline.subtitle;
   pptx.author = "AI-EvaluAIte";

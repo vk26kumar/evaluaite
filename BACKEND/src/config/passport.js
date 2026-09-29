@@ -17,11 +17,6 @@ function readCookie(req, name) {
   return undefined;
 }
 
-/**
- * Stores the OAuth `state` value in a short-lived, httpOnly cookie instead of
- * a server session. The callback only succeeds in the browser that started
- * the sign-in, which blocks login-CSRF without needing session storage.
- */
 class CookieStateStore {
   store(req, callback) {
     const state = crypto.randomBytes(24).toString("base64url");
@@ -50,10 +45,6 @@ class CookieStateStore {
   }
 }
 
-/**
- * Returns `{ user, passwordRemoved }`. `passwordRemoved` is true when linking
- * Google to an existing account removed a password nobody had verified.
- */
 async function findOrCreateGoogleUser(profile) {
   const email = profile.emails?.[0]?.value?.toLowerCase();
   const emailVerified = profile.emails?.[0]?.verified === true;
@@ -64,17 +55,10 @@ async function findOrCreateGoogleUser(profile) {
 
   if (!email) throw new Error("Google did not share an email address for this account.");
 
-  // Link to an existing email/password account, but only when Google has
-  // verified the address, so nobody can take over an account by claiming it.
   const byEmail = await User.findByEmail(email, { withPassword: true });
   if (byEmail) {
     if (!emailVerified) throw new Error("This Google account's email address isn't verified.");
 
-    // Nobody proved they owned this address when the password was set, so it
-    // may belong to someone who registered the address first and waited for
-    // the real owner to arrive. Google has now proved ownership: remove that
-    // password and sign out every earlier session, leaving the owner in sole
-    // control. They can add a new password from their profile.
     const passwordRemoved = Boolean(byEmail.password) && !byEmail.emailVerified;
     if (passwordRemoved) {
       byEmail.password = undefined;
@@ -122,4 +106,4 @@ function configurePassport() {
   return passport;
 }
 
-module.exports = { configurePassport, CookieStateStore, readCookie, findOrCreateGoogleUser };
+module.exports = { configurePassport, findOrCreateGoogleUser };

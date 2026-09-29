@@ -1,7 +1,3 @@
-/**
- * Generates question papers in the background. A failed regeneration keeps
- * the previous paper instead of leaving the teacher with nothing.
- */
 const config = require("../config/env");
 const Assignment = require("../models/Assignment");
 const ApiError = require("../utils/ApiError");
@@ -77,7 +73,6 @@ async function runJob({ assignmentId, file, referenceText, regenerate }) {
       logger.error("Question paper generation failed", { assignmentId, error: logger.serializeError(err) });
     }
 
-    // Regenerating an existing paper: keep it and explain what happened.
     const keepPrevious = regenerate && hasPaper(assignment);
     await Assignment.updateOne(
       { _id: assignmentId },
@@ -91,7 +86,6 @@ async function runJob({ assignmentId, file, referenceText, regenerate }) {
   }
 }
 
-/** Marks a single stuck job as finished, keeping any earlier paper. Returns true if it changed. */
 async function failIfStale(assignment) {
   const stale =
     IN_PROGRESS.includes(assignment.status) &&
@@ -110,7 +104,6 @@ async function failIfStale(assignment) {
   return true;
 }
 
-/** Called at startup: nothing is running yet, so every in-progress job is orphaned. */
 async function recoverInterruptedJobs() {
   const stuck = await Assignment.find({ status: { $in: IN_PROGRESS } }).select("paper.sections.questions._id");
   for (const assignment of stuck) {

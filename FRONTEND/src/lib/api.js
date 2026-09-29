@@ -2,10 +2,9 @@ import { readStorage, writeStorage } from "./storage";
 
 const TOKEN_KEY = "evaluaite.session";
 
-// Empty means "same origin", which the Vite dev server proxies to the API.
 const BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "").replace(/\/+$/, "");
 
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(message, { status = 0, code = "UNKNOWN", details } = {}) {
     super(message);
     this.name = "ApiError";
@@ -14,7 +13,6 @@ export class ApiError extends Error {
     this.details = details;
   }
 
-  /** Field errors as { fieldName: message } for inline form messages. */
   get fieldErrors() {
     const map = {};
     for (const detail of this.details || []) {
@@ -32,19 +30,13 @@ export const session = {
 
 const listeners = new Set();
 
-/** Subscribe to "your session expired" events coming from any request. */
 export function onSessionExpired(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
 async function readError(response) {
-  let body = null;
-  try {
-    body = await response.json();
-  } catch {
-    /* not JSON */
-  }
+  const body = await response.json().catch(() => null);
   const error = body?.error;
   const fallback =
     response.status >= 500
@@ -57,10 +49,6 @@ async function readError(response) {
   });
 }
 
-/**
- * Fetch wrapper: adds the session token, applies a timeout, and turns every
- * failure into an ApiError with a message that is safe to show.
- */
 export async function request(path, { method = "GET", body, form, signal, timeout = 60_000, raw = false } = {}) {
   const headers = { Accept: raw ? "*/*" : "application/json" };
   const token = session.getToken();
@@ -94,8 +82,6 @@ export async function request(path, { method = "GET", body, form, signal, timeou
 
   if (!response.ok) {
     const error = await readError(response);
-    // Only if the rejected token is still the current one: a request sent just
-    // before a password change must not sign out the fresh session.
     if (response.status === 401 && token && session.getToken() === token) {
       session.clear();
       listeners.forEach((listener) => listener(error));

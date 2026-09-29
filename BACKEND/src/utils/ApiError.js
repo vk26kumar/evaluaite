@@ -1,7 +1,3 @@
-/**
- * An error whose message is safe to show to API clients.
- * Anything thrown that is not an ApiError is treated as an internal error.
- */
 class ApiError extends Error {
   constructor(status, message, { code, details } = {}) {
     super(message);

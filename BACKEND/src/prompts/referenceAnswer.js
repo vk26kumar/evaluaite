@@ -1,10 +1,5 @@
 const { fence, DATA_NOT_INSTRUCTIONS } = require("./shared");
 
-/**
- * Drafts a model answer for the teacher's answer key. The teacher always
- * reviews and edits it, so it is written as an examiner's marking guide:
- * dense with the points that should earn marks, free of filler.
- */
 const REFERENCE_ANSWER_SYSTEM = `You are a subject-matter expert who writes model answers for teachers' answer keys. Grading will compare student answers against your answer, point by point, so every sentence must carry a point an examiner would award marks for.
 
 ${DATA_NOT_INSTRUCTIONS}

@@ -37,10 +37,6 @@ function ActivityItem({ item }) {
   );
 }
 
-/**
- * The user's history. `compact` shows a fixed number of recent items with
- * no filters or paging (for the overview).
- */
 export default function ActivityTimeline({ compact = false, limit = 20 }) {
   const [category, setCategory] = useState("all");
   const [items, setItems] = useState([]);
@@ -73,7 +69,6 @@ export default function ActivityTimeline({ compact = false, limit = 20 }) {
     return () => controller.abort();
   }, [load]);
 
-  // Group consecutive items by day.
   const groups = [];
   for (const item of items) {
     const label = dayLabel(item.createdAt);

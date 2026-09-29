@@ -1,7 +1,3 @@
-/**
- * Detects a file's real type from its first bytes. The browser-supplied
- * mimetype is only a hint and must not be trusted.
- */
 const SIGNATURES = [
   { mimeType: "image/jpeg", test: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
   {

@@ -1,11 +1,3 @@
-/**
- * One in-process queue for all background AI work (grading sheets and
- * generating papers), so the concurrency cap bounds total memory and
- * AI usage no matter which feature is busy.
- *
- * This assumes a single server instance. Callers mark jobs interrupted by a
- * restart as failed at startup.
- */
 const config = require("../config/env");
 const logger = require("../utils/logger");
 

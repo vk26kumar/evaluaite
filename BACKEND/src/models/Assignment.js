@@ -49,8 +49,6 @@ const AssignmentSchema = new mongoose.Schema(
     },
     additionalInstructions: { type: String, trim: true, default: "", maxlength: 1500 },
 
-    // The uploaded file itself is never stored. The model's condensed notes on
-    // it are kept so the paper can be regenerated from the same material.
     reference: {
       name: { type: String, default: "" },
       mimeType: { type: String, default: "" },
@@ -128,7 +126,6 @@ AssignmentSchema.methods.toClient = function toClient({ includeAnswers = true } 
   };
 };
 
-/** Totals from the requested structure, used before a paper exists. */
 function plannedTotals(questionTypes) {
   let questions = 0;
   let marks = 0;

@@ -123,7 +123,6 @@ function requireAi() {
   }
 }
 
-/** Accepts a reference file as an attachment for the model, or as plain text. */
 function readReference(file) {
   if (!file) return {};
   if (file.mimetype === "text/plain") {
@@ -168,7 +167,6 @@ router.get(
 
     await Promise.all(items.map((item) => jobs.failIfStale(item)));
 
-    // How many sheets have been graded against each paper.
     const counts = await Evaluation.aggregate([
       { $match: { owner: req.user._id, assignment: { $in: items.map((item) => item._id) } } },
       { $group: { _id: "$assignment", count: { $sum: 1 } } },
@@ -333,7 +331,6 @@ router.delete(
   asyncHandler(async (req, res) => {
     const assignment = await loadOwned(req);
     await assignment.deleteOne();
-    // Graded sheets stay, but no longer point at the deleted paper.
     await Evaluation.updateMany({ owner: req.user._id, assignment: assignment._id }, { $set: { assignment: null } });
     void logActivity(req.user, "assignment.deleted", {
       ...entityOf(assignment),

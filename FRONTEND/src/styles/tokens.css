@@ -1,43 +1,31 @@
-/*
- * Design tokens: "Red Pen".
- * Light theme is exam paper and ink; dark theme is a chalkboard.
- * Components use only these variables, never raw values.
- */
-
 :root {
   color-scheme: light;
 
-  /* Surfaces */
   --bg: #f4efe4;
   --surface: #fffdf8;
   --surface-2: #faf6ec;
   --surface-3: #f0e9da;
   --overlay: rgba(27, 33, 48, 0.42);
 
-  /* Text */
   --ink: #1b2130;
   --ink-2: #4a5263;
   --ink-3: #676e80;
   --ink-inverse: #fffdf8;
 
-  /* Lines */
   --rule: #e3dacb;
   --rule-strong: #cdc1ab;
   --paper-line: rgba(47, 84, 196, 0.09);
   --margin-line: rgba(194, 58, 44, 0.5);
 
-  /* Brand: the teacher's red pen */
   --accent: #c23a2c;
   --accent-hover: #a93124;
   --accent-tint: #fbe9e5;
   --accent-ink: #9e2f23;
   --on-accent: #fffdf8;
 
-  /* Student's blue ink */
   --blue: #2f54c4;
   --blue-tint: #e8edfa;
 
-  /* Status: always paired with an icon and a label */
   --good: #2b7a4b;
   --good-tint: #e4f2e9;
   --warn: #8f5b00;
@@ -45,17 +33,14 @@
   --bad: #b3261e;
   --bad-tint: #fbe5e2;
 
-  /* Chart marks (validated with the dataviz checker) */
   --chart-fill: #2f54c4;
   --chart-track: #e4e9f7;
 
-  /* Effects */
   --focus-ring: 0 0 0 3px rgba(194, 58, 44, 0.3);
   --shadow-sm: 0 1px 0 rgba(27, 33, 48, 0.04), 0 1px 2px rgba(27, 33, 48, 0.06);
   --shadow-md: 0 1px 0 rgba(27, 33, 48, 0.04), 0 12px 32px -14px rgba(27, 33, 48, 0.2);
   --shadow-lg: 0 2px 0 rgba(27, 33, 48, 0.04), 0 28px 64px -24px rgba(27, 33, 48, 0.32);
 
-  /* Type */
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
@@ -76,7 +61,6 @@
   --leading-snug: 1.3;
   --leading-body: 1.6;
 
-  /* Space (4px grid) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -90,21 +74,18 @@
   --space-20: 5rem;
   --space-24: 6rem;
 
-  /* Shape */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-pill: 999px;
 
-  /* Motion */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast: 120ms;
   --dur: 200ms;
   --dur-slow: 420ms;
 
-  /* Layout */
   --container: 1180px;
   --container-narrow: 760px;
   --gutter: 16px;

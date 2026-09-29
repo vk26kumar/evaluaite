@@ -4,7 +4,6 @@ const { SUPPORTED_MIME_TYPES } = require("../utils/fileType");
 
 const MAX_FILES = 6;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
-// Gemini accepts about 20 MB of inline data per request and base64 adds a third.
 const MAX_TOTAL_BYTES = 14 * 1024 * 1024;
 
 const answerSheetUpload = multer({

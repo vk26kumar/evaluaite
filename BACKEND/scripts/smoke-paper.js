@@ -1,9 +1,3 @@
-/**
- * Generates a real question paper with the Gemini API and writes both PDFs
- * to your temp folder. No database needed.
- *
- *   npm run smoke:paper
- */
 const fs = require("fs");
 const os = require("os");
 const path = require("path");

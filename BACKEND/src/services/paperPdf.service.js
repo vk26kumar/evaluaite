@@ -2,14 +2,6 @@ const path = require("path");
 const PDFDocument = require("pdfkit");
 const { QUESTION_TYPES } = require("../constants/questionTypes");
 
-/**
- * Renders a question paper as an A4 PDF in plain black and grey, so it
- * photocopies well. DejaVu Sans is embedded because the PDF standard fonts
- * can't print symbols like √, ≤, π or ₹ that exam papers need.
- *
- * variant "student": blank name and roll-number fields, no answers.
- * variant "teacher": marked as the teacher's copy, with an answer key at the end.
- */
 const FONT_DIR = path.join(__dirname, "..", "..", "assets", "fonts");
 const FONTS = {
   regular: path.join(FONT_DIR, "DejaVuSans.ttf"),
@@ -43,8 +35,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
       Creator: "AI-EvaluAIte",
     },
   });
-  // Turn off "fi"/"ff" ligatures for every text call. With them on, copied or
-  // searched text reads "defne" instead of "define", and screen readers stumble.
   const initOptions = doc._initOptions.bind(doc);
   doc._initOptions = (...args) => {
     const options = initOptions(...args);
@@ -73,7 +63,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
     doc.moveDown(gap / 10);
   };
 
-  // Header ------------------------------------------------------------------
   if (assignment.schoolName) centered(assignment.schoolName, "bold", 15);
   centered(assignment.title, "bold", 12);
   centered(`Subject: ${assignment.subject}     Class: ${assignment.className}`, "regular", 10, MUTED, 6);
@@ -102,7 +91,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
     });
     doc.y = bannerY + 30;
   } else {
-    // Blank fields the student fills in.
     const field = (label, x, y, fieldWidth) => {
       doc.font("regular").fontSize(10).fillColor(INK).text(label, x, y, { lineBreak: false });
       const start = x + doc.widthOfString(label) + 6;
@@ -117,7 +105,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
     doc.y = y2 + 30;
   }
 
-  // General instructions ------------------------------------------------------
   const instructions = assignment.paper.generalInstructions || [];
   if (instructions.length) {
     doc.font("bold").fontSize(10.5).fillColor(INK).text("General instructions", left, doc.y);
@@ -131,7 +118,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
     doc.moveDown(0.6);
   }
 
-  // Sections ----------------------------------------------------------------
   const numberWidth = 28;
   const marksWidth = 36;
   const textX = left + numberWidth;
@@ -159,7 +145,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
       doc.font("regular").fontSize(10.5);
       const textHeight = doc.heightOfString(q.text, { width: textWidth, lineGap: 2 });
 
-      // MCQ options: two columns when every option is short, otherwise one per line.
       const labels = ["A", "B", "C", "D"];
       const twoColumns = q.options.length > 0 && q.options.every((option) => option.length <= 42);
       const optionWidth = twoColumns ? textWidth / 2 - 6 : textWidth;
@@ -216,7 +201,6 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
   doc.moveDown(0.6);
   centered("— End of question paper —", "italic", 9, MUTED);
 
-  // Answer key (teacher's copy only) -------------------------------------------
   if (teacher) {
     doc.addPage();
     doc.font("bold").fontSize(14).fillColor(INK).text("Answer key and marking scheme", left, doc.y);
@@ -253,13 +237,12 @@ function renderPaperPdf(assignment, { variant = "student" } = {}) {
     }
   }
 
-  // Footer on every page ------------------------------------------------------
   const range = doc.bufferedPageRange();
   for (let i = range.start; i < range.start + range.count; i += 1) {
     doc.switchToPage(i);
     const footerY = doc.page.height - MARGIN.bottom + 24;
     const bottom = doc.page.margins.bottom;
-    doc.page.margins.bottom = 0; // writing inside the margin must not trigger a new page
+    doc.page.margins.bottom = 0;
     doc.font("regular").fontSize(8).fillColor(MUTED);
     doc.text(`${assignment.subject} · ${assignment.className}${teacher ? " · Teacher's copy" : ""}`, left, footerY, {
       width: width / 2,

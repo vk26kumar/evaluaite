@@ -50,8 +50,6 @@ export default function NewEvaluation() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
 
-  // The answer key is saved as you type, so it survives a reload and is ready
-  // for the next student's sheet. Uploaded pages are never stored.
   useEffect(() => {
     const timer = setTimeout(() => saveDraft({ title, difficulty, questions, assignment }), 400);
     return () => clearTimeout(timer);
@@ -62,7 +60,6 @@ export default function NewEvaluation() {
   const totalBytes = useMemo(() => pages.reduce((sum, page) => sum + page.file.size, 0), [pages]);
   const totalMarks = questions.reduce((sum, q) => sum + (Number(q.maxMarks) || 0), 0);
 
-  // Re-validate live once the teacher has tried to submit.
   useEffect(() => {
     if (errors) setErrors(validate({ title, questions, pages, totalBytes, maxTotalBytes: MAX_TOTAL_BYTES }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,8 +99,6 @@ export default function NewEvaluation() {
       navigate(`/evaluations/${evaluation.id}`);
     } catch (error) {
       setSubmitting(false);
-      // Client validation mirrors the server's, so this is almost always a
-      // network, size or AI-availability problem best explained in one line.
       toast.error(error.details?.[0]?.message || error.message);
     }
   };

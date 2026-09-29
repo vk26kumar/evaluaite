@@ -1,31 +1,26 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
 const { z } = require("zod");
 const User = require("../models/User");
 const Evaluation = require("../models/Evaluation");
 const Assignment = require("../models/Assignment");
 const Activity = require("../models/Activity");
 const AuthCode = require("../models/AuthCode");
+const EmailToken = require("../models/EmailToken");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const { requireAuth } = require("../middleware/auth");
-const { authLimiter } = require("../middleware/rateLimit");
+const { accountLimiter, verificationLimiter } = require("../middleware/rateLimit");
 const { parseOrThrow, validateBody } = require("../middleware/validate");
 const { logActivity } = require("../services/activity");
 const { signSessionToken } = require("../services/token.service");
+const accountEmail = require("../services/accountEmail.service");
+const { passwordSchema: newPassword, assertNotPersonal, hashPassword, verifyPassword } = require("../utils/password");
 const { buildStudentReport, evaluationStats, studentKey } = require("../services/profile.service");
 
 const router = express.Router();
 router.use(requireAuth);
 
-const BCRYPT_ROUNDS = 12;
 const MAX_SHEETS_FOR_STATS = 5000;
-
-const password = z
-  .string()
-  .min(8, "Password must be at least 8 characters.")
-  .max(128, "Password must be at most 128 characters.")
-  .refine((value) => /[A-Za-z]/.test(value) && /\d/.test(value), "Use at least one letter and one number.");
 
 const updateSchema = z
   .object({
@@ -39,7 +34,7 @@ const updateSchema = z
 
 const passwordSchema = z.object({
   currentPassword: z.string().max(128).optional(),
-  newPassword: password,
+  newPassword,
 });
 
 const activitySchema = z.object({
@@ -50,6 +45,7 @@ const activitySchema = z.object({
 
 const deleteSchema = z.object({
   confirm: z.literal("DELETE", { message: 'Type "DELETE" to confirm.' }),
+  password: z.string().max(128).optional(),
 });
 
 async function publicProfile(userId) {
@@ -111,44 +107,58 @@ router.patch(
 
 router.post(
   "/password",
-  authLimiter,
+  accountLimiter,
   validateBody(passwordSchema),
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id).select("+password");
     const { currentPassword, newPassword } = req.body;
 
-    // Google-only accounts can add a password without a current one.
     if (user.password) {
-      if (!currentPassword || !(await bcrypt.compare(currentPassword, user.password))) {
+      if (!currentPassword || !(await verifyPassword(currentPassword, user.password))) {
         throw ApiError.badRequest("Your current password is incorrect.", [
           { field: "currentPassword", message: "Your current password is incorrect." },
         ]);
       }
-      if (await bcrypt.compare(newPassword, user.password)) {
+      if (await verifyPassword(newPassword, user.password)) {
         throw ApiError.badRequest("Choose a password you haven't used here before.", [
           { field: "newPassword", message: "Choose a different password from your current one." },
         ]);
       }
     }
 
+    assertNotPersonal(newPassword, user.email, "newPassword");
+
     const hadPassword = Boolean(user.password);
-    user.password = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
-    // Anyone signed in with the old password is signed out. This device gets a
-    // fresh token so it stays signed in.
+    user.password = await hashPassword(newPassword);
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
     void logActivity(req.user, "account.password_changed", { kind: "account", meta: { added: !hadPassword } });
+    if (hadPassword) accountEmail.inBackground(() => accountEmail.sendPasswordChanged(user));
     res.json({ user: user.toPublic(), token: signSessionToken(user) });
   })
 );
 
 router.post(
   "/sessions/revoke",
-  authLimiter,
+  accountLimiter,
   asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user._id, { $inc: { tokenVersion: 1 } }, { new: true });
     void logActivity(req.user, "account.sessions_revoked", { kind: "account" });
     res.json({ token: signSessionToken(user) });
+  })
+);
+
+router.post(
+  "/email/verification",
+  verificationLimiter,
+  asyncHandler(async (req, res) => {
+    if (req.user.emailVerified) return res.json({ sent: false, alreadyVerified: true });
+    if (!accountEmail.isEnabled()) {
+      throw ApiError.unavailable("Email isn't set up on this server yet.", "EMAIL_NOT_CONFIGURED");
+    }
+    const sent = await accountEmail.sendVerification(req.user);
+    if (!sent) throw new ApiError(502, "We couldn't send the email just now. Please try again shortly.", { code: "EMAIL_FAILED" });
+    res.json({ sent: true });
   })
 );
 
@@ -167,7 +177,6 @@ router.get(
       Activity.countDocuments(filter),
     ]);
 
-    // Tell the client which items still exist, so it only links to live ones.
     const idsOf = (kind) => items.filter((item) => item.entity?.kind === kind && item.entity.id).map((item) => item.entity.id);
     const [liveAssignments, liveEvaluations] = await Promise.all([
       Assignment.find({ _id: { $in: idsOf("assignment") }, owner: req.user._id }).distinct("_id"),
@@ -207,15 +216,21 @@ router.get(
 
 router.delete(
   "/",
-  authLimiter,
+  accountLimiter,
   validateBody(deleteSchema),
   asyncHandler(async (req, res) => {
     const owner = req.user._id;
+    const user = await User.findById(owner).select("+password");
+    if (user.password && !(await verifyPassword(req.body.password || "", user.password))) {
+      throw ApiError.badRequest("Your password is incorrect.", [{ field: "password", message: "Your password is incorrect." }]);
+    }
+
     await Promise.all([
       Evaluation.deleteMany({ owner }),
       Assignment.deleteMany({ owner }),
       Activity.deleteMany({ user: owner }),
       AuthCode.deleteMany({ user: owner }),
+      EmailToken.deleteMany({ user: owner }),
     ]);
     await User.deleteOne({ _id: owner });
     res.status(204).end();

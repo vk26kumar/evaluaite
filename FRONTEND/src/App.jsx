@@ -7,9 +7,11 @@ import Landing from "./pages/Landing";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import AuthCallback from "./pages/auth/AuthCallback";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import NotFound from "./pages/NotFound";
 
-// Signed-in pages load on demand, so the landing page stays small.
 const NewEvaluation = lazy(() => import("./pages/evaluate/NewEvaluation"));
 const EvaluationPage = lazy(() => import("./pages/report/EvaluationPage"));
 const History = lazy(() => import("./pages/History"));
@@ -28,10 +30,6 @@ function ScrollToTop() {
   return null;
 }
 
-/*
- * HashRouter keeps deep links working on static hosts that can't rewrite
- * every path to index.html. Google sign-in redirects to /#/auth/callback.
- */
 export default function App() {
   return (
     <HashRouter>
@@ -41,10 +39,13 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route index element={<Landing />} />
             <Route path="auth/callback" element={<AuthCallback />} />
+            <Route path="reset-password" element={<ResetPassword />} />
+            <Route path="verify-email" element={<VerifyEmail />} />
 
             <Route element={<PublicOnly />}>
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<Signup />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
             </Route>
 
             <Route element={<RequireAuth />}>

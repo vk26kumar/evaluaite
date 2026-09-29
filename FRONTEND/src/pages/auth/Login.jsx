@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { LuEye, LuEyeOff } from "react-icons/lu";
 import { api } from "../../lib/api";
 import { useAuth } from "../../context/contexts";
 import { useDocumentTitle } from "../../lib/hooks";
 import { destinationLabel } from "../../lib/features";
 import Field from "../../components/Field";
+import { useProviders } from "../../lib/providers";
 import AuthLayout, { GoogleButton } from "./AuthLayout";
+import PasswordInput from "./PasswordInput";
 
 const OAUTH_ERRORS = {
   google: "Google sign-in didn't finish. Please try again.",
@@ -23,9 +24,9 @@ export default function Login() {
   const [values, setValues] = useState({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState(OAUTH_ERRORS[params.get("error")] || "");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const destination = destinationLabel(location.state?.from);
+  const providers = useProviders();
 
   const update = (name) => (event) => {
     setValues((current) => ({ ...current, [name]: event.target.value }));
@@ -85,28 +86,19 @@ export default function Login() {
             />
           )}
         </Field>
-        <Field label="Password" error={fieldErrors.password}>
-          {(props) => (
-            <div className="input-group">
-              <input
-                {...props}
-                className="input"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                value={values.password}
-                onChange={update("password")}
-              />
-              <button
-                type="button"
-                className="input-action"
-                onClick={() => setShowPassword((value) => !value)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <LuEyeOff aria-hidden="true" /> : <LuEye aria-hidden="true" />}
-              </button>
-            </div>
-          )}
-        </Field>
+        <PasswordInput
+          value={values.password}
+          onChange={update("password")}
+          error={fieldErrors.password}
+          autoComplete="current-password"
+        />
+        {providers.email && (
+          <p className="auth-row">
+            <Link to="/forgot-password" state={{ email: values.email.trim() }}>
+              Forgot password?
+            </Link>
+          </p>
+        )}
         <button type="submit" className="btn btn-ink btn-lg btn-block" data-loading={submitting || undefined}>
           Sign in
         </button>

@@ -15,7 +15,7 @@ import "./profile.css";
 
 const TABS = [
   { id: "overview", label: "Overview" },
-  { id: "students", label: "Students & marks" },
+  { id: "students", label: "Students & marks", short: "Students" },
   { id: "history", label: "History" },
   { id: "account", label: "Account" },
 ];
@@ -147,7 +147,15 @@ export default function ProfilePage() {
 
   const selectTab = (id) => setParams(id === "overview" ? {} : { tab: id }, { replace: true });
 
-  // Arrow keys move between tabs, as screen-reader users expect.
+  useEffect(() => {
+    const active = tabRefs.current[tab];
+    const strip = active?.parentElement;
+    if (strip && strip.scrollWidth > strip.clientWidth) {
+      const offset = active.getBoundingClientRect().left - strip.getBoundingClientRect().left;
+      strip.scrollLeft += offset - (strip.clientWidth - active.offsetWidth) / 2;
+    }
+  }, [tab]);
+
   const onTabKey = (event) => {
     const index = TABS.findIndex((t) => t.id === tab);
     const delta = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
@@ -245,7 +253,14 @@ export default function ProfilePage() {
             className="tab"
             onClick={() => selectTab(t.id)}
           >
-            {t.label}
+            {t.short ? (
+              <>
+                <span className="tab-label-long">{t.label}</span>
+                <span className="tab-label-short">{t.short}</span>
+              </>
+            ) : (
+              t.label
+            )}
           </button>
         ))}
       </div>

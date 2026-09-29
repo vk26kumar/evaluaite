@@ -4,10 +4,6 @@ const { normalizeTranscription, mergeQuestions, mergeOverall } = require("./grad
 const { TRANSCRIPTION_SYSTEM, TRANSCRIPTION_SCHEMA, buildTranscriptionPrompt } = require("../prompts/transcription");
 const { GRADING_SYSTEM, GRADING_SCHEMA, buildGradingPrompt } = require("../prompts/grading");
 
-/**
- * Pass 1: read the sheet. Files are { buffer, mimeType } objects.
- * `meta.model` is set to the model that did the work.
- */
 async function transcribeSheet(keyQuestions, files, meta) {
   const raw = await gemini.generateJson({
     label: "transcribe",
@@ -35,7 +31,6 @@ async function transcribeSheet(keyQuestions, files, meta) {
   return transcription;
 }
 
-/** Pass 2: mark the transcribed answers against the key. */
 async function gradeTranscription(keyQuestions, transcription, difficulty, meta) {
   const raw = await gemini.generateJson({
     label: "grade",
