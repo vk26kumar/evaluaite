@@ -50,34 +50,54 @@ class CookieStateStore {
   }
 }
 
+/**
+ * Returns `{ user, passwordRemoved }`. `passwordRemoved` is true when linking
+ * Google to an existing account removed a password nobody had verified.
+ */
 async function findOrCreateGoogleUser(profile) {
   const email = profile.emails?.[0]?.value?.toLowerCase();
-  const emailVerified = profile.emails?.[0]?.verified !== false;
+  const emailVerified = profile.emails?.[0]?.verified === true;
   const avatarUrl = profile.photos?.[0]?.value;
 
   const existing = await User.findOne({ googleId: profile.id });
-  if (existing) return existing;
+  if (existing) return { user: existing, passwordRemoved: false };
 
   if (!email) throw new Error("Google did not share an email address for this account.");
 
   // Link to an existing email/password account, but only when Google has
   // verified the address, so nobody can take over an account by claiming it.
-  const byEmail = await User.findByEmail(email);
+  const byEmail = await User.findByEmail(email, { withPassword: true });
   if (byEmail) {
     if (!emailVerified) throw new Error("This Google account's email address isn't verified.");
+
+    // Nobody proved they owned this address when the password was set, so it
+    // may belong to someone who registered the address first and waited for
+    // the real owner to arrive. Google has now proved ownership: remove that
+    // password and sign out every earlier session, leaving the owner in sole
+    // control. They can add a new password from their profile.
+    const passwordRemoved = Boolean(byEmail.password) && !byEmail.emailVerified;
+    if (passwordRemoved) {
+      byEmail.password = undefined;
+      byEmail.tokenVersion = (byEmail.tokenVersion || 0) + 1;
+    }
     byEmail.googleId = profile.id;
+    byEmail.emailVerified = true;
     if (!byEmail.avatarUrl && avatarUrl) byEmail.avatarUrl = avatarUrl;
-    return byEmail.save();
+    await byEmail.save();
+
+    void logActivity(byEmail, "account.google_linked", { kind: "account", meta: { passwordRemoved } });
+    return { user: byEmail, passwordRemoved };
   }
 
   const user = await User.create({
     googleId: profile.id,
     name: profile.displayName || email.split("@")[0],
     email,
+    emailVerified,
     avatarUrl,
   });
   void logActivity(user, "account.created", { kind: "account", meta: { method: "google" } });
-  return user;
+  return { user, passwordRemoved: false };
 }
 
 function configurePassport() {
@@ -93,7 +113,7 @@ function configurePassport() {
       },
       (accessToken, refreshToken, profile, done) => {
         findOrCreateGoogleUser(profile)
-          .then((user) => done(null, user))
+          .then(({ user, passwordRemoved }) => done(null, user, { passwordRemoved }))
           .catch((err) => done(err));
       }
     )
@@ -102,4 +122,4 @@ function configurePassport() {
   return passport;
 }
 
-module.exports = { configurePassport, CookieStateStore, readCookie };
+module.exports = { configurePassport, CookieStateStore, readCookie, findOrCreateGoogleUser };

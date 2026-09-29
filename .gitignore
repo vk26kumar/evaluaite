@@ -6,6 +6,9 @@ node_modules/
 .env.*
 !.env.example
 
+# Backups written by BACKEND/scripts/cleanup-legacy-data.js
+backups/
+
 # Build output
 dist/
 dist-ssr/

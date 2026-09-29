@@ -15,6 +15,7 @@ const schema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().int().positive().default(5000),
   MONGO_URI: optionalString,
+  MONGO_DB_NAME: optionalString,
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
   JWT_EXPIRES_IN: z.string().default("7d"),
   CLIENT_URL: z.string().default("http://localhost:5173"),
@@ -71,6 +72,24 @@ function parseTrustProxy(value) {
   return Number.isInteger(asNumber) ? asNumber : value;
 }
 
+/** The database named in the URI path, e.g. "school" in mongodb+srv://u:p@host/school?x=y. */
+function databaseInUri(uri) {
+  const match = /^mongodb(?:\+srv)?:\/\/[^/]+\/([^?]*)/.exec(uri || "");
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+/**
+ * Keeps local runs away from production data. When the URI names no database
+ * and MONGO_DB_NAME is unset, development uses "evaluaite-dev" on the same
+ * cluster. Production keeps the URI's database, or the driver's default
+ * ("test") when it names none, so existing data stays where it is.
+ */
+function databaseName() {
+  if (env.MONGO_DB_NAME) return env.MONGO_DB_NAME;
+  if (isProd || databaseInUri(env.MONGO_URI)) return undefined;
+  return env.NODE_ENV === "test" ? "evaluaite-test" : "evaluaite-dev";
+}
+
 const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 
 module.exports = {
@@ -79,6 +98,7 @@ module.exports = {
   isTest: env.NODE_ENV === "test",
   port: env.PORT,
   mongoUri: env.MONGO_URI,
+  mongoDbName: databaseName(),
   jwt: {
     secret: env.JWT_SECRET,
     expiresIn: env.JWT_EXPIRES_IN,

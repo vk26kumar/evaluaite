@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/env");
 
 function signSessionToken(user) {
-  return jwt.sign({ sub: String(user._id || user.id) }, config.jwt.secret, {
+  return jwt.sign({ sub: String(user._id || user.id), ver: user.tokenVersion || 0 }, config.jwt.secret, {
     expiresIn: config.jwt.expiresIn,
     issuer: config.jwt.issuer,
     audience: config.jwt.audience,

@@ -671,6 +671,21 @@ a.activity-row:hover {
   color: var(--ink-3);
 }
 
+.sessions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule);
+}
+
+.sessions-row p {
+  flex: 1 1 240px;
+  margin: 0;
+}
+
 .danger-zone {
   border-color: color-mix(in srgb, var(--bad) 30%, var(--rule));
 }

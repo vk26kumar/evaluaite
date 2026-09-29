@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../lib/api";
-import { useAuth } from "../../context/contexts";
+import { useAuth, useToast } from "../../context/contexts";
 import { useDocumentTitle } from "../../lib/hooks";
 import { ErrorState, PageLoader } from "../../components/Feedback";
 
@@ -11,6 +11,7 @@ export default function AuthCallback() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const toast = useToast();
   const [error, setError] = useState("");
   // The code is single-use; make sure a re-render or StrictMode's double
   // effect never spends it twice.
@@ -30,10 +31,16 @@ export default function AuthCallback() {
       .post("/api/auth/google/exchange", { code })
       .then((result) => {
         signIn(result);
+        if (result.notice === "password_removed") {
+          toast.info(
+            "Google is now linked to your account. For your security, the old password was removed and other devices were signed out. You can add a new password in Profile → Account.",
+            { duration: 12_000 }
+          );
+        }
         navigate("/evaluations", { replace: true });
       })
       .catch((err) => setError(err.message));
-  }, [params, navigate, signIn]);
+  }, [params, navigate, signIn, toast]);
 
   if (error) {
     return (

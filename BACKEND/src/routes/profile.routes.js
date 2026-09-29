@@ -12,6 +12,7 @@ const { requireAuth } = require("../middleware/auth");
 const { authLimiter } = require("../middleware/rateLimit");
 const { parseOrThrow, validateBody } = require("../middleware/validate");
 const { logActivity } = require("../services/activity");
+const { signSessionToken } = require("../services/token.service");
 const { buildStudentReport, evaluationStats, studentKey } = require("../services/profile.service");
 
 const router = express.Router();
@@ -132,9 +133,22 @@ router.post(
 
     const hadPassword = Boolean(user.password);
     user.password = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    // Anyone signed in with the old password is signed out. This device gets a
+    // fresh token so it stays signed in.
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
     void logActivity(req.user, "account.password_changed", { kind: "account", meta: { added: !hadPassword } });
-    res.json({ user: user.toPublic() });
+    res.json({ user: user.toPublic(), token: signSessionToken(user) });
+  })
+);
+
+router.post(
+  "/sessions/revoke",
+  authLimiter,
+  asyncHandler(async (req, res) => {
+    const user = await User.findByIdAndUpdate(req.user._id, { $inc: { tokenVersion: 1 } }, { new: true });
+    void logActivity(req.user, "account.sessions_revoked", { kind: "account" });
+    res.json({ token: signSessionToken(user) });
   })
 );
 

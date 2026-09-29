@@ -94,7 +94,9 @@ export async function request(path, { method = "GET", body, form, signal, timeou
 
   if (!response.ok) {
     const error = await readError(response);
-    if (response.status === 401 && token) {
+    // Only if the rejected token is still the current one: a request sent just
+    // before a password change must not sign out the fresh session.
+    if (response.status === 401 && token && session.getToken() === token) {
       session.clear();
       listeners.forEach((listener) => listener(error));
     }

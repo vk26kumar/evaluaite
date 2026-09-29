@@ -9,6 +9,12 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, select: false },
     googleId: { type: String, index: { unique: true, sparse: true } },
     avatarUrl: { type: String },
+    // True once someone has proved they own the address (Google sign-in does).
+    // Password sign-ups start unverified.
+    emailVerified: { type: Boolean, default: false },
+    // Session tokens carry this number. Bumping it signs out every existing
+    // session, such as after a password change.
+    tokenVersion: { type: Number, default: 0 },
 
     // Profile details. `institution` is also the default school name on new question papers.
     institution: { type: String, trim: true, maxlength: 120, default: "" },
