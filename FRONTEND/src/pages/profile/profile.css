@@ -1,5 +1,3 @@
-/* Hero --------------------------------------------------------------------- */
-
 .profile-hero {
   position: relative;
   display: grid;
@@ -10,7 +8,6 @@
   overflow: hidden;
 }
 
-/* A faint red margin rule, like the edge of an exercise book. */
 .profile-hero::before {
   content: "";
   position: absolute;
@@ -117,8 +114,6 @@
   }
 }
 
-/* Stat tiles --------------------------------------------------------------- */
-
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -164,8 +159,6 @@
   }
 }
 
-/* Tabs ---------------------------------------------------------------------- */
-
 .tabs {
   display: flex;
   gap: var(--space-1);
@@ -207,11 +200,33 @@
   outline-offset: -2px;
 }
 
+.tab-label-short {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .tab {
+    padding-inline: var(--space-3);
+  }
+
+  .tab-label-long {
+    display: none;
+  }
+
+  .tab-label-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 380px) {
+  .tab {
+    padding-inline: var(--space-2);
+  }
+}
+
 .tab-panel {
   animation: fade-in var(--dur) var(--ease-out);
 }
-
-/* Overview ----------------------------------------------------------------- */
 
 .overview-grid {
   display: grid;
@@ -298,8 +313,6 @@
   white-space: nowrap;
 }
 
-/* Activity timeline -------------------------------------------------------- */
-
 .activity-filters {
   flex-wrap: wrap;
   margin-bottom: var(--space-5);
@@ -327,7 +340,6 @@
   list-style: none;
 }
 
-/* The thread connecting a day's events. */
 .activity-list::before {
   content: "";
   position: absolute;
@@ -410,8 +422,6 @@ a.activity-row:hover {
   height: 15px;
   color: var(--ink-3);
 }
-
-/* Students ------------------------------------------------------------------ */
 
 .sort-select {
   display: inline-flex;
@@ -496,7 +506,6 @@ a.activity-row:hover {
   list-style: none;
 }
 
-/* Flex rather than grid: grid tracks inside a table cell can size past the cell. */
 .student-sheets li {
   display: flex;
   flex-wrap: wrap;
@@ -559,8 +568,6 @@ a.activity-row:hover {
   }
 }
 
-/* Account ------------------------------------------------------------------- */
-
 .settings {
   display: grid;
   gap: var(--space-5);
@@ -614,6 +621,7 @@ a.activity-row:hover {
 }
 
 .chips-input .chip button {
+  position: relative;
   display: grid;
   place-items: center;
   width: 16px;
@@ -621,6 +629,22 @@ a.activity-row:hover {
   margin-right: -4px;
   border-radius: 50%;
   color: inherit;
+}
+
+.chips-input .chip button::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+@media (pointer: coarse) {
+  .chips-input .chip button::after {
+    inset: -10px;
+  }
+
+  .chips-field {
+    min-height: 36px;
+  }
 }
 
 .chips-input .chip button:hover {

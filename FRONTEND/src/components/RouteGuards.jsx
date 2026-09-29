@@ -1,15 +1,16 @@
+import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/contexts";
 import { ErrorState, PageLoader } from "./Feedback";
 
-/**
- * Waits for the stored session to be verified before deciding. Rendering a
- * redirect before that check finishes is what used to bounce signed-in users
- * to the sign-up page.
- */
 export function RequireAuth() {
-  const { status, retry } = useAuth();
+  const { status, retry, exitTo } = useAuth();
   const location = useLocation();
+  const [wasSignedIn, setWasSignedIn] = useState(status === "authenticated");
+
+  useEffect(() => {
+    if (status === "authenticated") setWasSignedIn(true);
+  }, [status]);
 
   if (status === "checking") return <PageLoader label="Checking your session…" />;
   if (status === "unreachable") {
@@ -22,17 +23,20 @@ export function RequireAuth() {
     );
   }
   if (status !== "authenticated") {
+    if (wasSignedIn && exitTo) return <Navigate to={exitTo} replace />;
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
   return <Outlet />;
 }
 
-/** Sign-in and sign-up pages: signed-in users go straight to the app. */
 export function PublicOnly() {
   const { status } = useAuth();
   const location = useLocation();
 
   if (status === "checking") return <PageLoader label="Checking your session…" />;
-  if (status === "authenticated") return <Navigate to={location.state?.from || "/evaluations"} replace />;
+  if (status === "authenticated") {
+    const home = location.pathname === "/signup" ? "/evaluate" : "/evaluations";
+    return <Navigate to={location.state?.from || home} replace />;
+  }
   return <Outlet />;
 }

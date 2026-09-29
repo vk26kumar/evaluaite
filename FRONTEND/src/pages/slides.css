@@ -97,6 +97,12 @@
   cursor: pointer;
 }
 
+@media (pointer: coarse) {
+  .range {
+    height: 40px;
+  }
+}
+
 .range::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: var(--radius-pill);

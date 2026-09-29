@@ -74,6 +74,41 @@
   font-weight: 600;
 }
 
+.auth-success {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--good-tint);
+  color: var(--good);
+  font-size: var(--text-sm);
+}
+
+.auth-success svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.auth-success p {
+  margin: 0;
+  color: var(--ink);
+}
+
+.auth-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: var(--text-sm);
+}
+
+.auth-row a {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
 .auth-footer {
   margin-top: var(--space-5);
   text-align: center;
@@ -150,8 +185,6 @@
 .password-rules li[data-met="true"] svg {
   opacity: 1;
 }
-
-/* Decorative side panel ------------------------------------------------ */
 
 .auth-aside {
   --line-gap: 40px;

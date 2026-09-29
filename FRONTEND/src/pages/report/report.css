@@ -1,5 +1,3 @@
-/* Progress ----------------------------------------------------------------- */
-
 .progress-wrap {
   display: grid;
   gap: var(--space-5);
@@ -141,8 +139,6 @@ li[data-state="todo"] .progress-label {
   text-align: center;
 }
 
-/* Header ------------------------------------------------------------------- */
-
 .report-header {
   margin-bottom: var(--space-8);
 }
@@ -187,15 +183,22 @@ li[data-state="todo"] .progress-label {
 .report-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
+  gap: var(--space-1) var(--space-5);
   margin-top: var(--space-2);
+  padding-block: 2px;
+  overflow: hidden;
   color: var(--ink-2);
   font-size: var(--text-sm);
 }
 
-.report-meta span + span::before {
+.report-meta span {
+  position: relative;
+}
+
+.report-meta span::before {
   content: "·";
-  margin-right: var(--space-3);
+  position: absolute;
+  left: calc(var(--space-5) / -2 - 0.2em);
   color: var(--ink-3);
 }
 
@@ -205,7 +208,19 @@ li[data-state="todo"] .progress-label {
   flex-wrap: wrap;
 }
 
-/* Summary ------------------------------------------------------------------ */
+@media (max-width: 560px) {
+  .report-actions {
+    width: 100%;
+  }
+
+  .report-actions > .btn:not(.btn-icon) {
+    flex: 1 1 auto;
+  }
+
+  .report-actions > .btn.btn-primary {
+    flex: 1 1 100%;
+  }
+}
 
 .summary {
   display: grid;
@@ -222,7 +237,6 @@ li[data-state="todo"] .progress-label {
   min-width: 220px;
 }
 
-/* The one hero number on the page: sans-serif, with a red-pen circle around it. */
 .hero-figure {
   position: relative;
   display: flex;
@@ -321,8 +335,6 @@ li[data-state="todo"] .progress-label {
   margin-top: var(--space-2);
 }
 
-/* Chart + insights ------------------------------------------------------- */
-
 .report-columns {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
@@ -413,7 +425,6 @@ li[data-state="todo"] .progress-label {
   position: absolute;
   inset: 0 auto 0 0;
   background: var(--chart-fill);
-  /* Rounded at the data end, square at the baseline. */
   border-radius: 0 4px 4px 0;
   transition: width 700ms var(--ease-out), filter var(--dur) var(--ease-out);
 }
@@ -501,8 +512,6 @@ li[data-state="todo"] .progress-label {
   padding-left: var(--space-4);
   border-left: 2px solid var(--rule);
 }
-
-/* Question reviews ------------------------------------------------------ */
 
 .questions-section {
   margin-top: var(--space-12);
@@ -781,6 +790,7 @@ li[data-state="todo"] .progress-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 32px;
   color: var(--ink-2);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -800,6 +810,12 @@ li[data-state="todo"] .progress-label {
   transform: rotate(180deg);
 }
 
+@media (pointer: coarse) {
+  .model-toggle {
+    min-height: 44px;
+  }
+}
+
 .model-answer-text {
   margin-top: var(--space-3);
   padding: var(--space-4);
@@ -816,8 +832,6 @@ li[data-state="todo"] .progress-label {
   font-size: var(--text-xs);
   text-align: center;
 }
-
-/* Failed ------------------------------------------------------------------- */
 
 .failed-card {
   display: flex;
@@ -841,8 +855,6 @@ li[data-state="todo"] .progress-label {
   color: var(--ink-2);
   max-width: 60ch;
 }
-
-/* Print ------------------------------------------------------------------- */
 
 @media print {
   .report-page {

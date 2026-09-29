@@ -81,6 +81,46 @@ test("security headers are set", async () => {
   const res = await fetch(`${base}/api/auth/providers`);
   assert.equal(res.headers.get("x-content-type-options"), "nosniff");
   assert.equal(res.headers.get("x-powered-by"), null);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.equal(res.headers.get("etag"), null);
+  assert.match(res.headers.get("content-security-policy"), /default-src 'none'/);
+  assert.match(res.headers.get("content-security-policy"), /frame-ancestors 'none'/);
+  assert.match(res.headers.get("strict-transport-security"), /max-age=\d+/);
+  assert.equal(res.headers.get("referrer-policy"), "no-referrer");
+});
+
+test("every response carries a request id, and a safe incoming one is kept", async () => {
+  const generated = await fetch(`${base}/api/auth/providers`);
+  assert.match(generated.headers.get("x-request-id"), /^[\w-]{36}$/);
+  const kept = await fetch(`${base}/api/auth/providers`, { headers: { "X-Request-Id": "trace-1234abcd" } });
+  assert.equal(kept.headers.get("x-request-id"), "trace-1234abcd");
+  const rejected = await fetch(`${base}/api/auth/providers`, { headers: { "X-Request-Id": "<script>" } });
+  assert.notEqual(rejected.headers.get("x-request-id"), "<script>");
+});
+
+test("tokens signed with another algorithm are rejected", async () => {
+  const jwt = require("jsonwebtoken");
+  const config = require("../src/config/env");
+  const forged = jwt.sign({ sub: "0123456789abcdef01234567", ver: 0 }, config.jwt.secret, {
+    algorithm: "HS512",
+    issuer: config.jwt.issuer,
+    audience: config.jwt.audience,
+  });
+  const res = await fetch(`${base}/api/auth/me`, { headers: { Authorization: `Bearer ${forged}` } });
+  assert.equal(res.status, 401);
+});
+
+test("weak and common passwords are refused at sign-up", async () => {
+  for (const password of ["Password123", "qwerty123", "a".repeat(70) + "1é"]) {
+    const res = await fetch(`${base}/api/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Test", email: "t@example.com", password }),
+    });
+    assert.equal(res.status, 400, password);
+    const body = await res.json();
+    assert.equal(body.error.details[0].field, "password");
+  }
 });
 
 test("health reports the database as down when it isn't connected", async () => {

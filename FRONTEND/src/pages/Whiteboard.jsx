@@ -23,7 +23,6 @@ const TOOLS = [
   { id: "ellipse", label: "Ellipse", key: "o", icon: LuCircle },
 ];
 
-// The board is always light paper, like a real whiteboard, so these stay fixed in both themes.
 const COLORS = [
   { name: "Ink", value: "#1b2130" },
   { name: "Red pen", value: "#c23a2c" },
@@ -55,7 +54,6 @@ function drawStroke(ctx, stroke) {
       ctx.arc(start.x, start.y, ctx.lineWidth / 2, 0, Math.PI * 2);
       ctx.fill();
     } else {
-      // Quadratic curves through midpoints give smooth lines from jittery input.
       ctx.beginPath();
       ctx.moveTo(start.x, start.y);
       for (let i = 1; i < points.length - 1; i += 1) {
@@ -95,7 +93,6 @@ function renderAll(canvas, strokes) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
-  // Nothing before the last "clear" is visible, so skip it.
   let from = 0;
   strokes.forEach((stroke, index) => {
     if (stroke.tool === "clear") from = index + 1;
@@ -121,10 +118,10 @@ export default function Whiteboard() {
   const hasContent = strokes.current.some((stroke) => stroke.tool !== "clear");
   useBeforeUnload(hasContent);
 
-  // Keep both canvases sized to their container at device resolution.
   useEffect(() => {
     const wrap = wrapRef.current;
     const resize = () => {
+      if (!baseRef.current || !overlayRef.current) return;
       const { width, height } = wrap.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       for (const canvas of [baseRef.current, overlayRef.current]) {
@@ -216,7 +213,6 @@ export default function Whiteboard() {
     bump();
   }, []);
 
-  // Clearing is itself a step, so it can be undone.
   const clear = useCallback(() => {
     if (!strokes.current.some((stroke) => stroke.tool !== "clear")) return;
     strokes.current.push({ tool: "clear", points: [] });
@@ -356,7 +352,7 @@ export default function Whiteboard() {
         {!hasContent && (
           <p className="board-hint" aria-hidden="true">
             <span className="hand">Start sketching…</span>
-            <span>P pen · H highlighter · E eraser · L line · R rectangle · O ellipse</span>
+            <span className="board-shortcuts">P pen · H highlighter · E eraser · L line · R rectangle · O ellipse</span>
           </p>
         )}
       </div>

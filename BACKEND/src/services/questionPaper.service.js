@@ -12,12 +12,6 @@ function cleanOptions(options) {
     .filter(Boolean);
 }
 
-/**
- * Turns raw model output into a paper that matches the requested structure.
- * Marks always come from the teacher's settings, never from the model.
- *
- * @returns {{ paper: object, shortfall: Array<{type: string, requested: number, got: number}>, sourceNotes: string }}
- */
 function normalizePaper(raw, questionTypes) {
   const source = raw && typeof raw === "object" ? raw : {};
   const rawSections = Array.isArray(source.sections) ? source.sections : [];
@@ -33,7 +27,7 @@ function normalizePaper(raw, questionTypes) {
         const text = cleanString(q?.text, 3000);
         let options = row.type === "mcq" ? cleanOptions(q?.options) : [];
         if (row.type === "mcq") {
-          if (options.length < 4) return null; // an MCQ without four options can't be printed
+          if (options.length < 4) return null;
           options = options.slice(0, 4);
         }
         if (!text) return null;
@@ -93,14 +87,6 @@ function describeShortfall(shortfall) {
     .join(", ");
 }
 
-/**
- * @param {object} assignment plain assignment fields (with totalMarks)
- * @param {object} [input]
- * @param {{buffer: Buffer, mimeType: string}} [input.file] reference file to attach
- * @param {string} [input.referenceText] text material or saved notes from an earlier generation
- * @param {string[]} [input.avoid] previous question texts, when regenerating
- * @param {object} [input.meta] receives `model`, the model that wrote the paper
- */
 async function generatePaper(assignment, { file, referenceText = "", avoid = [], meta } = {}) {
   const parts = [
     gemini.textPart(buildQuestionPaperPrompt(assignment, { hasFile: Boolean(file), referenceText, avoid })),
@@ -108,7 +94,6 @@ async function generatePaper(assignment, { file, referenceText = "", avoid = [],
   if (file) parts.push(gemini.filePart(file.buffer, file.mimeType));
 
   let best = null;
-  // One retry when the model returns fewer questions than asked for.
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     const raw = await gemini.generateJson({
       label: "question-paper",

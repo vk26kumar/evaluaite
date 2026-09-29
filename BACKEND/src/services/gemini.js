@@ -30,10 +30,7 @@ function getClient() {
     client = new GoogleGenAI({
       apiKey: config.gemini.apiKey,
       httpOptions: {
-        // Per attempt. Reading several handwritten pages can take a while.
         timeout: 120_000,
-        // Retries 408, 429 and 5xx once. Kept short because an overloaded model
-        // falls back to GEMINI_FALLBACK_MODEL, which is faster than waiting.
         retryOptions: { attempts: 2, initialDelay: 1, maxDelay: 8 },
       },
     });
@@ -41,7 +38,6 @@ function getClient() {
   return client;
 }
 
-/** Turns SDK and network failures into errors that are safe to show users. */
 function translateError(err) {
   if (err instanceof ApiError) return err;
 
@@ -85,13 +81,12 @@ function parseJson(text) {
   try {
     return JSON.parse(text);
   } catch {
-    // Some models wrap JSON in a Markdown fence despite the JSON mime type.
     const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
     if (fenced) {
       try {
         return JSON.parse(fenced[1]);
       } catch {
-        /* fall through */
+        return undefined;
       }
     }
     return undefined;
@@ -104,9 +99,6 @@ const filePart = (buffer, mimeType) => ({
   inlineData: { data: buffer.toString("base64"), mimeType },
 });
 
-// Worth trying the next model: overloaded (503), rate-limited (429), server
-// error (500) or retired for this key (404). Anything else, such as a bad
-// request or blocked content, would fail the same way on every model.
 const FALLBACK_STATUSES = new Set([404, 429, 500, 503]);
 
 function modelChain() {
@@ -114,7 +106,6 @@ function modelChain() {
   return fallbackModel && fallbackModel !== model ? [model, fallbackModel] : [model];
 }
 
-/** One model; malformed or empty output is retried once, since it is usually transient. */
 async function generateWithModel(ai, model, { label, system, parts, schema }) {
   const maxAttempts = 2;
 
@@ -158,11 +149,6 @@ async function generateWithModel(ai, model, { label, system, parts, schema }) {
   });
 }
 
-/**
- * Calls Gemini with a JSON schema and returns the parsed object. When the
- * main model is overloaded or unavailable, the fallback model is used.
- * Pass `meta` to learn which model produced the result (`meta.model`).
- */
 async function generateJson({ label, system, parts, schema, meta }) {
   const ai = getClient();
   const models = modelChain();
@@ -186,7 +172,6 @@ async function generateJson({ label, system, parts, schema, meta }) {
   throw translateError(lastError);
 }
 
-/** For tests: replace the SDK client. */
 function setClientForTests(fake) {
   client = fake;
 }

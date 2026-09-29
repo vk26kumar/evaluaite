@@ -2,13 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, onSessionExpired, session } from "../lib/api";
 import { AuthContext, useToast } from "./contexts";
 
-/**
- * Session state machine:
- *   checking      a stored token is being verified with the server
- *   authenticated user is known
- *   anonymous     no valid session
- *   unreachable   a token exists but the server couldn't be reached to verify it
- */
 export default function AuthProvider({ children }) {
   const toast = useToast();
   const [state, setState] = useState(() => ({
@@ -17,6 +10,10 @@ export default function AuthProvider({ children }) {
   }));
 
   const verify = useCallback(async (signal) => {
+    if (!session.getToken()) {
+      setState({ status: "anonymous", user: null });
+      return;
+    }
     try {
       const { user } = await api.get("/api/auth/me", { signal, timeout: 70_000 });
       setState({ status: "authenticated", user });
@@ -34,7 +31,6 @@ export default function AuthProvider({ children }) {
     return () => controller.abort();
   }, [state.status, verify]);
 
-  // Any request that comes back 401 ends the session everywhere.
   useEffect(
     () =>
       onSessionExpired((error) => {
@@ -44,7 +40,6 @@ export default function AuthProvider({ children }) {
     [toast]
   );
 
-  // Signing out in one tab signs out every tab.
   useEffect(() => {
     const onStorage = (event) => {
       if (event.key === "evaluaite.session" && !event.newValue) setState({ status: "anonymous", user: null });
@@ -58,14 +53,13 @@ export default function AuthProvider({ children }) {
     setState({ status: "authenticated", user });
   }, []);
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback((exitTo) => {
     session.clear();
-    setState({ status: "anonymous", user: null });
+    setState({ status: "anonymous", user: null, exitTo });
   }, []);
 
   const retry = useCallback(() => setState({ status: "checking", user: null }), []);
 
-  // After a profile edit, so the header and menus show the new details at once.
   const updateUser = useCallback(
     (user) => setState((current) => (current.status === "authenticated" ? { ...current, user } : current)),
     []

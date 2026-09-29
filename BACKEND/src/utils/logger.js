@@ -12,7 +12,6 @@ function write(level, message, meta) {
   const stream = level === "error" || level === "warn" ? console.error : console.log;
 
   if (isProd) {
-    // One JSON object per line so log drains can parse it.
     stream(JSON.stringify({ time: new Date().toISOString(), level, message, ...payload }));
     return;
   }

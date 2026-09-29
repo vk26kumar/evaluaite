@@ -77,10 +77,6 @@ function QuestionEditor({ assignmentId, question, isMcq, onSaved, onCancel }) {
   );
 }
 
-/**
- * The paper as it will print. `mode` is "student" (no answers) or
- * "teacher" (answers, difficulty and editing).
- */
 export default function PaperView({ assignment, mode, onUpdated }) {
   const [editing, setEditing] = useState(null);
   const teacher = mode === "teacher";

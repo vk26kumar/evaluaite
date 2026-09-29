@@ -17,14 +17,32 @@ Every feature is visible in the navigation to anyone; using one requires signing
 - **Private by design.** Uploaded pages are processed in memory and never written to disk or the database.
 - **Question papers.** Pick question types (multiple choice, true/false, fill in the blanks, short, long, numerical, diagram), counts, marks and a difficulty mix, and optionally upload a chapter. AI writes the paper and an answer key. Edit any question, write a new version, copy it, and download a student PDF or a teacher PDF with the answer key.
 - **Paper → grading in one click.** "Grade sheets" turns the paper's answer key into the grading key, and results collect on the paper per student.
+- **Account recovery.** Forgot-password emails, email confirmation, "sign out other devices", and a notice by email whenever the password changes.
 - **Profile.** Your details (the school name prints on new papers), headline stats, every student's marks across sheets with trends and CSV export, and a history of everything you created, copied, regenerated, graded, adjusted and deleted.
 - Light ("paper") and dark ("chalkboard") themes, responsive layout, keyboard and screen-reader support, print-ready reports.
 
 ## Architecture
 
 ```
-FRONTEND/   React 19 + Vite single-page app (HashRouter, plain CSS design tokens)
-BACKEND/    Express 4 API, MongoDB (Mongoose), Google Gemini via @google/genai
+BACKEND/                 Express 4 API, MongoDB (Mongoose), Google Gemini via @google/genai
+  server.js              start-up: database, indexes, interrupted-job recovery, graceful shutdown
+  src/app.js             security headers, CORS, request ids, rate limits, routes
+  src/config/            environment validation, database, Google sign-in
+  src/routes/            HTTP endpoints, one file per area
+  src/services/          grading, question papers, PDFs, slides, email, background jobs
+  src/prompts/           every prompt sent to Gemini
+  src/models/            Mongoose schemas
+  src/middleware/        sessions, validation, uploads, rate limits, errors
+  src/utils/             small shared helpers (errors, logging, passwords, text)
+  scripts/               smoke tests against the real APIs, one-off data cleanup
+  test/                  node:test suites: unit, HTTP and in-memory MongoDB
+FRONTEND/                React 19 + Vite single-page app (HashRouter, plain CSS design tokens)
+  src/pages/             one file or folder per screen
+  src/components/        shared UI: app shell, fields, feedback, route guards
+  src/context/           auth, theme and toast providers
+  src/lib/               API client, formatting, hooks, shared rules
+  src/styles/            design tokens, base and component styles
+  public/                legal pages, security.txt, robots.txt, favicon
 ```
 
 ### How grading works
@@ -66,13 +84,15 @@ Local runs never touch production data: when `MONGO_URI` names no database, deve
 ### Checks
 
 ```bash
-cd BACKEND  && npm test               # unit, HTTP and database tests; no API key needed (the first run downloads a MongoDB test binary)
+cd BACKEND  && npm run lint && npm test   # 70 unit, HTTP and database tests; no API key needed (the first run downloads a MongoDB test binary)
 cd BACKEND  && npm run smoke:grade    # grades test/fixtures/sample-answer-sheet.jpg with the real Gemini API
 cd BACKEND  && npm run smoke:paper    # generates a real question paper and writes both PDFs to your temp folder
 cd FRONTEND && npm run lint && npm run build
 ```
 
-GitHub Actions runs the same checks, plus `npm audit`, on every push and pull request (`.github/workflows/ci.yml`).
+GitHub Actions runs the same checks, plus `npm audit`, on every push and pull request (`.github/workflows/ci.yml`). Dependabot proposes dependency updates weekly.
+
+In development, emails aren't sent: the backend prints them, links included, to its console.
 
 ## Configuration
 
@@ -89,6 +109,10 @@ GitHub Actions runs the same checks, plus `npm audit`, on every push and pull re
 | `CLIENT_URL` | yes in prod | Allowed browser origin(s), comma-separated. The first one is where Google sign-in returns to. |
 | `SERVER_URL` | for Google | Public URL of the API, used for the OAuth callback. On Render it defaults to `RENDER_EXTERNAL_URL`. |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Enables "Continue with Google". |
+| `EMAIL_PROVIDER` | for email | `brevo` or `resend`. Development defaults to `log`, which prints emails to the console; production refuses `log`. Without a provider, forgot password and email confirmation are hidden. |
+| `EMAIL_API_KEY` | for email | API key from the provider. |
+| `EMAIL_FROM` | for email | Sender address, verified with the provider. |
+| `EMAIL_FROM_NAME` | no | Sender name, default `AI-EvaluAIte`. |
 | `JWT_EXPIRES_IN` | no | Session length, default `7d`. |
 | `MAX_CONCURRENT_JOBS` | no | Sheets graded at the same time, default `2`. |
 | `NODE_ENV` | prod | Set to `production` when deployed. |
@@ -116,6 +140,16 @@ No secrets belong in the frontend. Every `VITE_` variable is embedded in the pub
 
 **Google sign-in:** in Google Cloud Console, add `<backend URL>/api/auth/google/callback` as an authorised redirect URI.
 
+**Email (Brevo, free for 300 emails a day, no domain needed):**
+1. Create an account at brevo.com.
+2. Under **Senders, domains & dedicated IPs**, add a sender and confirm the address from the email Brevo sends you.
+3. Under **SMTP & API, API keys**, create a key.
+4. On the Render backend, set `EMAIL_PROVIDER=brevo`, `EMAIL_API_KEY=<key>` and `EMAIL_FROM=<the confirmed address>`, then redeploy.
+
+Once you own a domain, Resend (`EMAIL_PROVIDER=resend`) is a good alternative, and a domain you have authenticated (SPF, DKIM) keeps emails out of spam with either provider.
+
+**Security headers:** add the static-site headers listed in [SECURITY.md](SECURITY.md#render-static-site-headers).
+
 The app uses hash-based routes (`/#/evaluate`), so the static site needs no rewrite rules.
 
 ## API overview
@@ -128,6 +162,8 @@ All routes except auth, providers and health require `Authorization: Bearer <tok
 | `GET` | `/api/auth/providers` | Which sign-in methods are enabled |
 | `POST` | `/api/auth/signup`, `/api/auth/login` | Email and password sessions |
 | `GET` | `/api/auth/me` | Current user |
+| `POST` | `/api/auth/password/forgot`, `/api/auth/password/reset` | Email a reset link / set a new password with it |
+| `POST` | `/api/auth/email/verify` | Confirm an email address with the emailed link |
 | `GET` | `/api/auth/google` → `/api/auth/google/callback` | Google OAuth; returns a one-time code to the app |
 | `POST` | `/api/auth/google/exchange` | Swap the one-time code for a session |
 | `GET` / `POST` | `/api/evaluations` | List (paginated) / create (multipart: `files[]` + `payload` JSON) |
@@ -144,19 +180,14 @@ All routes except auth, providers and health require `Authorization: Bearer <tok
 | `GET` / `PATCH` / `DELETE` | `/api/profile` | Profile and stats / update details / delete the account |
 | `POST` | `/api/profile/password` | Change or add a password; signs out other sessions and returns a new token |
 | `POST` | `/api/profile/sessions/revoke` | Sign out every other session; returns a new token for this one |
+| `POST` | `/api/profile/email/verification` | Send a new confirmation email |
 | `GET` | `/api/profile/students`, `/api/profile/activity` | Marks per student / activity history |
 
-Errors always look like `{ "error": { "message", "code", "details?" } }`.
+Errors always look like `{ "error": { "message", "code", "details?", "requestId?" } }`. Every response carries an `X-Request-Id` header that matches the server log.
 
 ## Security
 
-- Every data and AI route requires a valid session; evaluations are scoped to their owner.
-- Passwords are hashed with bcrypt (cost 12); failed logins are rate-limited and don't reveal whether an email exists.
-- Google OAuth uses a CSRF `state` cookie, and the session token never appears in a URL: the app receives a single-use, 60-second code instead.
-- Sessions carry a version number. Changing the password or choosing "Sign out other devices" retires every older session at once.
-- Google sign-in links to an existing account only when Google has verified the email. If that account has a password nobody verified, the password is removed and its sessions end, so an address registered by someone else can't be used to get into the real owner's account.
-- Uploads are limited to 6 files, 10 MB each and 14 MB in total, and their type is checked from file contents, not the browser's claim.
-- Helmet security headers, a CORS allow-list, JSON body limits, per-account AI rate limits and schema validation on every input.
+The full production checklist (headers, sessions, passwords, rate limits, AI safety, logging, reliability) and how to report a vulnerability are in [SECURITY.md](SECURITY.md).
 
 ## Maintenance
 

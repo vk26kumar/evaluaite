@@ -21,7 +21,6 @@ const sorters = {
   recent: (a, b) => new Date(b.latestAt) - new Date(a.latestAt),
 };
 
-/** Score trend, oldest to newest, on a fixed 0–100% scale. The latest sheet is the filled dot. */
 function Sparkline({ values }) {
   if (values.length < 2) return <span className="muted small">—</span>;
   const width = 76;
@@ -58,7 +57,6 @@ function toCsv(students) {
       rows.push([student.name, sheet.title, new Date(sheet.date).toISOString().slice(0, 10), sheet.awarded, sheet.max, sheet.percentage]);
     }
   }
-  // The BOM makes Excel open UTF-8 names (e.g. accented or Hindi) correctly.
   return "﻿" + rows.map((row) => row.map(escape).join(",")).join("\r\n");
 }
 

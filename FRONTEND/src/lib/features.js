@@ -1,10 +1,5 @@
 import { LuFileText, LuHistory, LuPenLine, LuPresentation, LuSquarePen, LuUserRound } from "react-icons/lu";
 
-/**
- * The app's features, in navigation order. The navbar shows them to
- * everyone; each route still requires sign-in, and the sign-in page uses
- * `label` to say where the visitor is headed.
- */
 export const FEATURES = [
   {
     to: "/evaluate",
@@ -45,7 +40,6 @@ export const FEATURES = [
 
 const EXTRA_DESTINATIONS = [{ to: "/profile", label: "your profile", icon: LuUserRound }];
 
-/** Human name for where a signed-out visitor was trying to go. */
 export function destinationLabel(path = "") {
   const match = [...FEATURES, ...EXTRA_DESTINATIONS]
     .sort((a, b) => b.to.length - a.to.length)

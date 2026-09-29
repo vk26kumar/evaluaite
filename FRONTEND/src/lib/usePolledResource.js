@@ -7,14 +7,6 @@ function nextDelay(elapsedMs) {
   return 8_000;
 }
 
-/**
- * Loads `path` and keeps polling while `isPending(data)` is true, backing
- * off over time. A failed poll keeps the last good data and retries.
- *
- * @param {string} path API path
- * @param {(body: object) => object} select picks the resource out of the response
- * @param {(data: object) => boolean} isPending
- */
 export function usePolledResource(path, select, isPending) {
   const [state, setState] = useState({ phase: "loading", data: null, error: null });
   const [reloadKey, setReloadKey] = useState(0);
@@ -45,7 +37,6 @@ export function usePolledResource(path, select, isPending) {
       controller.abort();
       clearTimeout(timer);
     };
-    // `select` and `isPending` are expected to be stable (module-level) functions.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, reloadKey]);
 

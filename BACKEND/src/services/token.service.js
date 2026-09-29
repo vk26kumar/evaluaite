@@ -12,6 +12,7 @@ function signSessionToken(user) {
 
 function verifySessionToken(token) {
   return jwt.verify(token, config.jwt.secret, {
+    algorithms: ["HS256"],
     issuer: config.jwt.issuer,
     audience: config.jwt.audience,
   });

@@ -1,10 +1,6 @@
 const Activity = require("../models/Activity");
 const logger = require("../utils/logger");
 
-/**
- * Records an entry in the user's activity history. Never throws: failing to
- * write history must not fail the action the user actually asked for.
- */
 async function logActivity(user, type, { kind, id, title, meta } = {}) {
   try {
     await Activity.create({

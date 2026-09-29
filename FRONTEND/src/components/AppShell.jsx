@@ -116,7 +116,6 @@ function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Close the mobile menu after navigating.
   const [lastPath, setLastPath] = useState(location.pathname);
   if (lastPath !== location.pathname) {
     setLastPath(location.pathname);
@@ -135,7 +134,6 @@ function Header() {
       <div className="container header-inner">
         <Logo to={isAuthenticated ? "/evaluations" : "/"} />
 
-        {/* Everyone sees every feature; the routes themselves ask visitors to sign in. */}
         <nav className="main-nav" aria-label="Main">
           {NAV.map(({ to, label, icon: Icon, blurb }) => (
             <NavLink
@@ -225,7 +223,6 @@ function Footer() {
         </div>
         <div className="footer-meta">
           <span className="hand">marked with care</span>
-          {/* Static pages served from /public, outside the hash router. */}
           <nav className="footer-links" aria-label="Legal">
             <a href="/privacy.html">Privacy Policy</a>
             <a href="/terms.html">Terms of Service</a>
@@ -240,7 +237,6 @@ function Footer() {
 export default function AppShell() {
   return (
     <>
-      {/* A button, not an href="#main" link: with hash routing that would change the route. */}
       <button type="button" className="skip-link" onClick={() => document.getElementById("main")?.focus()}>
         Skip to content
       </button>

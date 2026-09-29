@@ -7,6 +7,7 @@ import {
   LuKeyRound,
   LuLink,
   LuLogOut,
+  LuMailCheck,
   LuPencil,
   LuPresentation,
   LuRefreshCw,
@@ -21,10 +22,6 @@ import { formatMarks } from "./format";
 const quote = (title) => `“${title || "Untitled"}”`;
 const pct = (meta) => (meta?.percentage !== undefined ? ` (${Math.round(meta.percentage)}%)` : "");
 
-/**
- * Describes an activity entry: icon, tone, sentence and (when the item
- * still exists) a link to it.
- */
 export function describeActivity(item) {
   const { type, entity, meta = {} } = item;
   const title = entity?.title;
@@ -52,6 +49,10 @@ export function describeActivity(item) {
         text: "Connected your Google account",
         detail: meta.passwordRemoved ? "The old password was removed and other devices were signed out" : "",
       };
+    case "account.password_reset":
+      return { ...base, icon: LuKeyRound, text: "Reset your password from an email link" };
+    case "account.email_verified":
+      return { ...base, icon: LuMailCheck, tone: "good", text: "Confirmed your email address" };
     case "account.sessions_revoked":
       return { ...base, icon: LuLogOut, text: "Signed out on every other device" };
     case "assignment.created":
@@ -93,7 +94,6 @@ export const ACTIVITY_CATEGORIES = [
   { value: "account", label: "Account" },
 ];
 
-/** "Today", "Yesterday" or a date, for grouping a timeline. */
 export function dayLabel(value) {
   const date = new Date(value);
   const today = new Date();

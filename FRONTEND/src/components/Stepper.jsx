@@ -1,4 +1,3 @@
-/** A number input with − and + buttons. Buttons are skipped by Tab; arrow keys and typing still work. */
 export default function Stepper({ id, value, onChange, min = 0, max = 100, step = 1, invalid, label }) {
   const clamp = (next) => Math.min(max, Math.max(min, Math.round(next / step) * step));
   const numeric = Number(value) || 0;

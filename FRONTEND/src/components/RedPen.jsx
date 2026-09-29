@@ -1,8 +1,3 @@
-/**
- * Hand-drawn red-pen marks: the product's signature. Each one draws itself
- * in with a stroke animation (skipped when reduced motion is requested).
- */
-
 const drawStyle = (length, delay = 0) => ({
   strokeDasharray: length,
   strokeDashoffset: length,

@@ -23,8 +23,6 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      // Capitalised names are components used in JSX, which core ESLint can't see,
-      // including ones renamed while destructuring (`icon: Icon`).
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' }],
       'react-refresh/only-export-components': [
         'warn',

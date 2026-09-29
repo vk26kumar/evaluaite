@@ -1,10 +1,3 @@
-/**
- * Grades the sample handwritten sheet in test/fixtures against a small answer
- * key, using the real Gemini API. No database needed.
- *
- *   npm run smoke:grade            # Medium strictness
- *   npm run smoke:grade -- Tough   # Easy | Medium | Tough
- */
 const fs = require("fs");
 const path = require("path");
 const config = require("../src/config/env");

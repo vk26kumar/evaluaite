@@ -5,7 +5,6 @@ import { useAuth, useToast } from "../../context/contexts";
 import { useDocumentTitle } from "../../lib/hooks";
 import { ErrorState, PageLoader } from "../../components/Feedback";
 
-/** Exchanges the one-time code from Google sign-in for a session. */
 export default function AuthCallback() {
   useDocumentTitle("Signing you in");
   const [params] = useSearchParams();
@@ -13,8 +12,6 @@ export default function AuthCallback() {
   const { signIn } = useAuth();
   const toast = useToast();
   const [error, setError] = useState("");
-  // The code is single-use; make sure a re-render or StrictMode's double
-  // effect never spends it twice.
   const started = useRef(false);
 
   useEffect(() => {

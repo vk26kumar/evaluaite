@@ -3,7 +3,6 @@ const assert = require("node:assert/strict");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-// Loads the config in a fresh process, since it is read once at startup.
 function databaseFor(env) {
   const result = spawnSync(
     process.execPath,
@@ -32,7 +31,6 @@ test("local development never uses the production database by default", () => {
 });
 
 test("production keeps the database it has always used", () => {
-  // No name in the URI: the driver's default, where existing data lives.
   assert.equal(databaseFor({ NODE_ENV: "production", MONGO_URI: noDatabase }), null);
 });
 

@@ -1,8 +1,3 @@
-/**
- * Question types a paper can contain. `rules` is the type-specific guidance
- * sent to the model; `answerStyle` says how its answer-key entry is written,
- * because that entry doubles as the model answer when the paper is graded.
- */
 const QUESTION_TYPES = {
   mcq: {
     label: "Multiple choice",

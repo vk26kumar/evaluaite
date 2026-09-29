@@ -5,7 +5,6 @@ export function formatBytes(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-/** Marks read naturally: 4, 4.5, 10 — never 4.0. */
 export function formatMarks(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return "–";
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 });
@@ -48,7 +47,6 @@ export function formatDuration(ms) {
   return minutes ? `${minutes}:${String(seconds).padStart(2, "0")}` : `${seconds}s`;
 }
 
-/** Performance band shown on the report. Deliberately neutral wording. */
 export function scoreBand(percentage) {
   if (percentage >= 85) return { label: "Excellent", tone: "good" };
   if (percentage >= 70) return { label: "Good", tone: "good" };

@@ -4,8 +4,8 @@ import { LuCamera, LuFileText, LuUpload, LuX } from "react-icons/lu";
 import { prepareForUpload } from "../../lib/image";
 import { formatBytes } from "../../lib/format";
 
-export const MAX_FILES = 6;
-export const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_FILES = 6;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const MAX_TOTAL_BYTES = 14 * 1024 * 1024;
 
 const ACCEPT = {
@@ -25,17 +25,12 @@ function describeRejection({ file, errors }) {
   return `“${file.name}” couldn't be added.`;
 }
 
-/**
- * Pages of the answer sheet. `pages` is an array of
- * { id, file, previewUrl, originalSize }; the parent owns it.
- */
 export default function SheetDropzone({ pages, onChange, error }) {
   const [processing, setProcessing] = useState(0);
   const [rejections, setRejections] = useState([]);
   const pagesRef = useRef(pages);
   pagesRef.current = pages;
 
-  // Revoke preview URLs when the component unmounts.
   useEffect(() => () => pagesRef.current.forEach((page) => page.previewUrl && URL.revokeObjectURL(page.previewUrl)), []);
 
   const remaining = MAX_FILES - pages.length;

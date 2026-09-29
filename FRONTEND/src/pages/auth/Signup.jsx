@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LuCheck, LuEye, LuEyeOff } from "react-icons/lu";
 import { api } from "../../lib/api";
 import { useAuth } from "../../context/contexts";
 import { useDocumentTitle } from "../../lib/hooks";
 import { destinationLabel } from "../../lib/features";
 import Field from "../../components/Field";
 import AuthLayout, { GoogleButton } from "./AuthLayout";
-
-const PASSWORD_RULES = [
-  { id: "length", label: "8+ characters", test: (value) => value.length >= 8 },
-  { id: "letter", label: "A letter", test: (value) => /[A-Za-z]/.test(value) },
-  { id: "number", label: "A number", test: (value) => /\d/.test(value) },
-];
+import { meetsPasswordRules } from "../../lib/password";
+import PasswordInput from "./PasswordInput";
 
 export default function Signup() {
   useDocumentTitle("Create an account");
@@ -23,7 +18,6 @@ export default function Signup() {
   const [values, setValues] = useState({ name: "", email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const destination = destinationLabel(location.state?.from);
 
@@ -36,7 +30,7 @@ export default function Signup() {
     const errors = {};
     if (values.name.trim().length < 2) errors.name = "Enter your name.";
     if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) errors.email = "Enter a valid email address.";
-    if (!PASSWORD_RULES.every((rule) => rule.test(values.password))) {
+    if (!meetsPasswordRules(values.password)) {
       errors.password = "Use 8+ characters with at least one letter and one number.";
     }
     return errors;
@@ -109,40 +103,7 @@ export default function Signup() {
             />
           )}
         </Field>
-        <Field label="Password" error={fieldErrors.password}>
-          {(props) => (
-            <div className="input-group">
-              <input
-                {...props}
-                className="input"
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                value={values.password}
-                onChange={update("password")}
-              />
-              <button
-                type="button"
-                className="input-action"
-                onClick={() => setShowPassword((value) => !value)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <LuEyeOff aria-hidden="true" /> : <LuEye aria-hidden="true" />}
-              </button>
-            </div>
-          )}
-        </Field>
-        <ul className="password-rules" aria-label="Password requirements">
-          {PASSWORD_RULES.map((rule) => {
-            const met = rule.test(values.password);
-            return (
-              <li key={rule.id} data-met={met}>
-                <LuCheck aria-hidden="true" />
-                {rule.label}
-                <span className="sr-only">{met ? "(met)" : "(not met)"}</span>
-              </li>
-            );
-          })}
-        </ul>
+        <PasswordInput value={values.password} onChange={update("password")} error={fieldErrors.password} showRules />
         <button type="submit" className="btn btn-primary btn-lg btn-block" data-loading={submitting || undefined}>
           Create account
         </button>

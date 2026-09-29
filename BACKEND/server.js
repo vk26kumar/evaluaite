@@ -21,6 +21,10 @@ async function start() {
     });
   });
 
+  server.keepAliveTimeout = 65_000;
+  server.headersTimeout = 66_000;
+  server.requestTimeout = 5 * 60_000;
+
   let shuttingDown = false;
   const shutdown = (signal) => {
     if (shuttingDown) return;
@@ -30,7 +34,6 @@ async function start() {
       await disconnectDatabase().catch(() => {});
       process.exit(0);
     });
-    // Don't hang forever on open keep-alive connections.
     setTimeout(() => process.exit(1), 10_000).unref();
   };
 
@@ -43,7 +46,6 @@ process.on("unhandledRejection", (reason) => {
 });
 
 process.on("uncaughtException", (err) => {
-  // State may be corrupt after an uncaught exception; exit and let the host restart us.
   logger.error("Uncaught exception", { error: logger.serializeError(err) });
   process.exit(1);
 });

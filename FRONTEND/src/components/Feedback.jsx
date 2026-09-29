@@ -1,15 +1,6 @@
 import { useEffect, useRef } from "react";
 import { LuCircleAlert, LuRefreshCw } from "react-icons/lu";
 
-export function Spinner({ size = 20, label }) {
-  return (
-    <span role={label ? "status" : undefined} style={{ display: "inline-grid", placeItems: "center" }}>
-      <span className="spinner" style={{ "--size": `${size}px` }} aria-hidden="true" />
-      {label && <span className="sr-only">{label}</span>}
-    </span>
-  );
-}
-
 export function PageLoader({ label = "Loading…" }) {
   return (
     <div className="page-loader" role="status" aria-live="polite">
@@ -36,7 +27,6 @@ export function ErrorState({ title = "Something went wrong", message, onRetry })
   );
 }
 
-/** Accessible confirmation built on the native <dialog> element. */
 export function ConfirmDialog({ open, title, message, confirmLabel = "Confirm", tone = "danger", busy, onConfirm, onCancel }) {
   const ref = useRef(null);
 

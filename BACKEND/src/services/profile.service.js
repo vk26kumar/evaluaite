@@ -1,10 +1,5 @@
-/**
- * Pure helpers that turn a teacher's graded sheets into per-student records
- * and headline numbers for the profile page.
- */
 const { summarizeScores } = require("../models/Evaluation");
 
-/** "  aman   VERMA " and "Aman Verma" are the same student. */
 function studentKey(name) {
   return String(name || "")
     .normalize("NFKC")
@@ -15,10 +10,6 @@ function studentKey(name) {
 
 const round1 = (value) => Math.round(value * 10) / 10;
 
-/**
- * @param {Array<object>} evaluations completed evaluations (lean) with
- *   _id, title, studentName, assignment, questions[{maxMarks, awardedMarks}], createdAt
- */
 function buildStudentReport(evaluations) {
   const students = new Map();
   let unnamedSheets = 0;
@@ -43,7 +34,6 @@ function buildStudentReport(evaluations) {
     if (!students.has(key)) students.set(key, { key, name: "", latest: -Infinity, evaluations: [] });
     const student = students.get(key);
     student.evaluations.push(record);
-    // Show the spelling of the name used on the most recent sheet.
     const time = new Date(evaluation.createdAt).getTime();
     if (time >= student.latest) {
       student.latest = time;
@@ -70,9 +60,6 @@ function buildStudentReport(evaluations) {
   return { students: rows, unnamedSheets };
 }
 
-/**
- * @param {Array<object>} evaluations all of the user's evaluations (lean, minimal fields)
- */
 function evaluationStats(evaluations) {
   const completed = evaluations.filter((e) => e.status === "completed");
   const percentages = completed.map((e) => summarizeScores(e.questions).percentage);

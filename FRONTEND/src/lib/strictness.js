@@ -1,4 +1,3 @@
-// The three marking levels. Values match the server enum; labels are what teachers see.
 export const STRICTNESS = [
   {
     value: "Easy",

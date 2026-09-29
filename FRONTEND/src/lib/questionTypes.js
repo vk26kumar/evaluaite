@@ -1,4 +1,3 @@
-// Mirrors BACKEND/src/constants/questionTypes.js. Values are what the API expects.
 export const QUESTION_TYPES = [
   { value: "mcq", label: "Multiple choice", hint: "4 options, one correct", defaultMarks: 1 },
   { value: "true_false", label: "True or false", hint: "One clear statement", defaultMarks: 1 },

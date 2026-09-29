@@ -212,7 +212,6 @@ export default function QuestionEditor({ questions, onChange, errors, subject })
 
   const add = () => {
     onChange([...questions, newQuestion()]);
-    // Focus the new question once it renders.
     requestAnimationFrame(() => {
       const cards = document.querySelectorAll(".question-card .textarea-question");
       cards[cards.length - 1]?.focus();

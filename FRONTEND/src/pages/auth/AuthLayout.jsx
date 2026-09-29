@@ -1,31 +1,13 @@
-import { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { LuLock } from "react-icons/lu";
-import { api, apiUrl } from "../../lib/api";
+import { apiUrl } from "../../lib/api";
+import { useProviders } from "../../lib/providers";
 import { PenCircle, PenTick } from "../../components/RedPen";
 import "./auth.css";
 
-let providersPromise;
-function loadProviders() {
-  providersPromise ??= api.get("/api/auth/providers", { timeout: 70_000 }).catch(() => {
-    providersPromise = undefined;
-    return { google: false };
-  });
-  return providersPromise;
-}
-
 export function GoogleButton({ label = "Continue with Google" }) {
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    loadProviders().then((providers) => active && setEnabled(Boolean(providers.google)));
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (!enabled) return null;
+  const { google } = useProviders();
+  if (!google) return null;
 
   return (
     <>

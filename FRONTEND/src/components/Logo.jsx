@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export function LogoMark({ size = 30 }) {
+function LogoMark({ size = 30 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="var(--surface)" stroke="var(--ink)" strokeWidth="1.5" />

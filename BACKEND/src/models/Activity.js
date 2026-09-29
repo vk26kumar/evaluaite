@@ -1,17 +1,13 @@
 const mongoose = require("mongoose");
 
-/**
- * An append-only log of what a user did: created, copied, regenerated and
- * deleted assignments, graded and deleted sheets, adjusted marks, and so on.
- * Entries keep a snapshot of the item's title, so the history still reads
- * correctly after the item itself is deleted.
- */
 const ACTIVITY_TYPES = [
   "account.created",
   "account.updated",
   "account.password_changed",
   "account.google_linked",
   "account.sessions_revoked",
+  "account.password_reset",
+  "account.email_verified",
   "assignment.created",
   "assignment.generated",
   "assignment.failed",
@@ -56,4 +52,3 @@ ActivitySchema.methods.toClient = function toClient() {
 };
 
 module.exports = mongoose.model("Activity", ActivitySchema);
-module.exports.ACTIVITY_TYPES = ACTIVITY_TYPES;

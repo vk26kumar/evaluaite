@@ -1,9 +1,3 @@
-/**
- * Phone photos of answer sheets are often 4–8 MB. Handwriting stays perfectly
- * legible at ~2400px on the long edge, so images are downscaled and
- * re-encoded in the browser before upload. That makes uploads faster and
- * keeps a multi-page sheet within the server's size limit. PDFs pass through.
- */
 const MAX_EDGE = 2400;
 const QUALITY = 0.86;
 
@@ -35,7 +29,7 @@ export async function prepareForUpload(file) {
     canvas.width = Math.round(image.naturalWidth * scale);
     canvas.height = Math.round(image.naturalHeight * scale);
     const context = canvas.getContext("2d");
-    context.fillStyle = "#ffffff"; // flatten transparent PNGs onto white paper
+    context.fillStyle = "#ffffff";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
@@ -45,6 +39,6 @@ export async function prepareForUpload(file) {
     const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
     return new File([blob], name, { type: "image/jpeg", lastModified: file.lastModified });
   } catch {
-    return file; // let the server decide
+    return file;
   }
 }

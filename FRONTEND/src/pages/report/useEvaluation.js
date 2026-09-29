@@ -3,17 +3,12 @@ import { api } from "../../lib/api";
 
 export const IN_PROGRESS = ["queued", "reading", "grading"];
 
-/** Poll quickly at first, then back off: most sheets finish within a minute. */
 function nextDelay(elapsedMs) {
   if (elapsedMs < 30_000) return 2_000;
   if (elapsedMs < 120_000) return 4_000;
   return 8_000;
 }
 
-/**
- * Loads an evaluation and keeps polling while it is being graded.
- * A failed poll keeps the last good data on screen and simply retries.
- */
 export function useEvaluation(id) {
   const [state, setState] = useState({ phase: "loading", evaluation: null, error: null });
   const [reloadKey, setReloadKey] = useState(0);

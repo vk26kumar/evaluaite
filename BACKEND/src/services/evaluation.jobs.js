@@ -1,10 +1,3 @@
-/**
- * Grades evaluations in the background, so an upload request returns
- * immediately and the browser polls for progress.
- *
- * Uploaded files are held in memory only until their job finishes; they are
- * never written to disk or the database.
- */
 const config = require("../config/env");
 const Evaluation = require("../models/Evaluation");
 const ApiError = require("../utils/ApiError");
@@ -21,7 +14,6 @@ function enqueue(evaluationId, files) {
   jobQueue.enqueue(`evaluation:${evaluationId}`, () => runJob({ evaluationId: String(evaluationId), files }));
 }
 
-/** Moves a job forward, unless it was deleted or failed in the meantime. */
 async function setStatus(id, status) {
   const result = await Evaluation.updateOne({ _id: id, status: { $in: IN_PROGRESS } }, { $set: { status } });
   return result.matchedCount > 0;
@@ -53,10 +45,8 @@ async function runJob({ evaluationId, files }) {
 
     if (!(await setStatus(evaluationId, "grading"))) return;
     const { questions, overall } = await gradeTranscription(keyQuestions, transcription, evaluation.difficulty, gradeMeta);
-    // Record the models that actually did the work, in case a fallback was used.
     const models = [...new Set([readMeta.model, gradeMeta.model].filter(Boolean))];
 
-    // Keep the original sub-document ids so links to a question stay valid.
     const withIds = questions.map((q, index) => ({ ...q, _id: evaluation.questions[index]._id }));
 
     const saved = await Evaluation.updateOne(
@@ -99,11 +89,6 @@ function isStale(evaluation) {
   );
 }
 
-/**
- * Marks a single stuck evaluation as failed. Returns true if it changed.
- * Uses an atomic update rather than save(): callers may pass documents loaded
- * with a partial projection, and a job that just finished must not be overwritten.
- */
 async function failIfStale(evaluation) {
   if (!isStale(evaluation)) return false;
   const result = await Evaluation.updateOne(
@@ -116,7 +101,6 @@ async function failIfStale(evaluation) {
   return true;
 }
 
-/** Called at startup: nothing is running yet, so every in-progress job is orphaned. */
 async function recoverInterruptedJobs() {
   const result = await Evaluation.updateMany(
     { status: { $in: IN_PROGRESS } },

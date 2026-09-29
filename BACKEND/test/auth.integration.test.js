@@ -1,5 +1,3 @@
-// Session and account-linking rules, against a real (in-memory) MongoDB.
-// The first run downloads a MongoDB binary, which takes a minute.
 require("./setup");
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -116,10 +114,8 @@ test("tokens issued before session versions existed keep working", async () => {
 });
 
 test("linking Google removes a password nobody verified and signs out its sessions", async () => {
-  // Someone registers the address first, with a password of their choosing...
   const { token: squatter } = await signUp("claimed@school.example");
 
-  // ...then the real owner signs in with Google.
   const { user, passwordRemoved } = await findOrCreateGoogleUser(googleProfile("g-claimed", "Claimed@School.example", true));
   assert.equal(passwordRemoved, true);
   assert.equal(user.googleId, "g-claimed");
@@ -135,7 +131,6 @@ test("linking Google removes a password nobody verified and signs out its sessio
   const activity = await waitForActivity({ user: user._id, type: "account.google_linked" });
   assert.equal(activity?.meta.passwordRemoved, true);
 
-  // The owner can then add a password of their own, and later Google sign-ins keep it.
   const session = signSessionToken(stored);
   const added = await call("POST", "/api/profile/password", { token: session, body: { newPassword: "owner12345" } });
   assert.equal(added.status, 200);
@@ -190,4 +185,116 @@ test("the Google code exchange passes on the password-removed notice once", asyn
 
   const reused = await call("POST", "/api/auth/google/exchange", { body: { code } });
   assert.equal(reused.status, 401, "codes are single-use");
+});
+
+const outbox = [];
+const emailService = require("../src/services/email.service");
+emailService.sendEmail = async (message) => {
+  outbox.push(message);
+};
+
+async function nextEmail(to, subject) {
+  for (let i = 0; i < 40; i += 1) {
+    const index = outbox.findIndex((message) => message.to === to && subject.test(message.subject));
+    if (index >= 0) return outbox.splice(index, 1)[0];
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  return null;
+}
+
+const tokenIn = (message) => /token=([\w-]+)/.exec(message.text)?.[1];
+
+test("forgot password answers the same whether or not the account exists", async () => {
+  await signUp("forgot@school.example");
+  const known = await call("POST", "/api/auth/password/forgot", { body: { email: "Forgot@School.example" } });
+  const unknown = await call("POST", "/api/auth/password/forgot", { body: { email: "nobody@school.example" } });
+  assert.equal(known.status, 200);
+  assert.deepEqual(known.body, unknown.body);
+  assert.ok(await nextEmail("forgot@school.example", /reset/i), "the real account gets a reset email");
+  assert.equal(await nextEmail("nobody@school.example", /reset/i), null);
+});
+
+test("a reset link sets a new password, signs out other sessions and works once", async () => {
+  const { token: oldSession } = await signUp("reset@school.example");
+  await call("POST", "/api/auth/password/forgot", { body: { email: "reset@school.example" } });
+  const link = tokenIn(await nextEmail("reset@school.example", /reset/i));
+  assert.ok(link);
+
+  const weak = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "password123" } });
+  assert.equal(weak.status, 400);
+  const personal = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "reset12345" } });
+  assert.equal(personal.status, 400, "a password containing the email name is refused");
+
+  const res = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "brandnew42" } });
+  assert.equal(res.status, 200, "refused attempts didn't use up the link");
+  assert.equal((await me(res.body.token)).status, 200, "signs the user in");
+  assert.equal(res.body.user.emailVerified, true, "resetting proves the inbox belongs to them");
+  assert.equal((await me(oldSession)).status, 401);
+  assert.equal((await logIn("reset@school.example", "brandnew42")).status, 200);
+  assert.ok(await nextEmail("reset@school.example", /changed/i), "sends a password-changed notice");
+
+  const reused = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "another42x" } });
+  assert.equal(reused.status, 400);
+});
+
+test("a newer reset email replaces the older link", async () => {
+  await signUp("twice@school.example");
+  await call("POST", "/api/auth/password/forgot", { body: { email: "twice@school.example" } });
+  const first = tokenIn(await nextEmail("twice@school.example", /reset/i));
+  await call("POST", "/api/auth/password/forgot", { body: { email: "twice@school.example" } });
+  const second = tokenIn(await nextEmail("twice@school.example", /reset/i));
+  const old = await call("POST", "/api/auth/password/reset", { body: { token: first, password: "brandnew42" } });
+  assert.equal(old.status, 400);
+  const fresh = await call("POST", "/api/auth/password/reset", { body: { token: second, password: "brandnew42" } });
+  assert.equal(fresh.status, 200);
+});
+
+test("expired reset links are refused", async () => {
+  const EmailToken = require("../src/models/EmailToken");
+  const { user } = await signUp("expired@school.example");
+  const link = "an-expired-token-that-is-long-enough";
+  await EmailToken.create({
+    user: user.id,
+    purpose: "password_reset",
+    tokenHash: sha256(link),
+    expiresAt: new Date(Date.now() - 1000),
+  });
+  const res = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "brandnew42" } });
+  assert.equal(res.status, 400);
+});
+
+test("sign-up sends a confirmation email and the link verifies the address", async () => {
+  const { token, user } = await signUp("confirm@school.example");
+  assert.equal(user.emailVerified, false);
+  const link = tokenIn(await nextEmail("confirm@school.example", /confirm/i));
+  assert.ok(link);
+
+  const res = await call("POST", "/api/auth/email/verify", { body: { token: link } });
+  assert.equal(res.status, 200);
+  assert.equal((await me(token)).body.user.emailVerified, true);
+  const reused = await call("POST", "/api/auth/email/verify", { body: { token: link } });
+  assert.equal(reused.status, 400, "links work once");
+
+  const again = await call("POST", "/api/profile/email/verification", { token });
+  assert.equal(again.body.alreadyVerified, true);
+});
+
+test("an unconfirmed user can ask for a new confirmation email", async () => {
+  const { token } = await signUp("resend@school.example");
+  await nextEmail("resend@school.example", /confirm/i);
+  const res = await call("POST", "/api/profile/email/verification", { token });
+  assert.equal(res.status, 200);
+  assert.equal(res.body.sent, true);
+  assert.ok(await nextEmail("resend@school.example", /confirm/i));
+});
+
+test("deleting an account needs the password when it has one", async () => {
+  const { token } = await signUp("leaving@school.example");
+  const wrong = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE", password: "not-mine-1" } });
+  assert.equal(wrong.status, 400);
+  const missing = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE" } });
+  assert.equal(missing.status, 400);
+  const ok = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE", password: "chalk1234" } });
+  assert.equal(ok.status, 204);
+  assert.equal((await me(token)).status, 401);
 });

@@ -2,7 +2,6 @@ const path = require("path");
 const dotenv = require("dotenv");
 const { z } = require("zod");
 
-// Load BACKEND/.env regardless of the directory the process was started from.
 dotenv.config({ path: path.join(__dirname, "..", "..", ".env"), quiet: true });
 
 const optionalString = z
@@ -22,11 +21,13 @@ const schema = z.object({
   SERVER_URL: optionalString,
   RENDER_EXTERNAL_URL: optionalString,
   GEMINI_API_KEY: optionalString,
-  // Legacy name used by earlier versions of this project.
   GEMINI_API: optionalString,
   GEMINI_MODEL: z.string().trim().default("gemini-flash-latest"),
-  // Used when the main model is overloaded or unavailable. Set it empty to turn fallback off.
   GEMINI_FALLBACK_MODEL: z.string().trim().default("gemini-flash-lite-latest"),
+  EMAIL_PROVIDER: z.enum(["brevo", "resend", "log", "none"]).optional(),
+  EMAIL_API_KEY: optionalString,
+  EMAIL_FROM: optionalString,
+  EMAIL_FROM_NAME: z.string().trim().default("AI-EvaluAIte"),
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   TRUST_PROXY: optionalString,
@@ -54,6 +55,13 @@ if (isProd && env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
+const emailProvider = env.EMAIL_PROVIDER || (isProd ? "none" : "log");
+
+if (isProd && emailProvider === "log") {
+  console.error("EMAIL_PROVIDER=log writes sign-in links to the logs and is only for development. Use brevo or resend.");
+  process.exit(1);
+}
+
 const stripSlash = (url) => url.replace(/\/+$/, "");
 
 const clientUrls = env.CLIENT_URL.split(",")
@@ -72,18 +80,11 @@ function parseTrustProxy(value) {
   return Number.isInteger(asNumber) ? asNumber : value;
 }
 
-/** The database named in the URI path, e.g. "school" in mongodb+srv://u:p@host/school?x=y. */
 function databaseInUri(uri) {
   const match = /^mongodb(?:\+srv)?:\/\/[^/]+\/([^?]*)/.exec(uri || "");
   return match ? decodeURIComponent(match[1]) : "";
 }
 
-/**
- * Keeps local runs away from production data. When the URI names no database
- * and MONGO_DB_NAME is unset, development uses "evaluaite-dev" on the same
- * cluster. Production keeps the URI's database, or the driver's default
- * ("test") when it names none, so existing data stays where it is.
- */
 function databaseName() {
   if (env.MONGO_DB_NAME) return env.MONGO_DB_NAME;
   if (isProd || databaseInUri(env.MONGO_URI)) return undefined;
@@ -113,6 +114,12 @@ module.exports = {
     apiKey: env.GEMINI_API_KEY || env.GEMINI_API,
     model: env.GEMINI_MODEL,
     fallbackModel: env.GEMINI_FALLBACK_MODEL,
+  },
+  email: {
+    provider: emailProvider,
+    apiKey: env.EMAIL_API_KEY,
+    from: env.EMAIL_FROM,
+    fromName: env.EMAIL_FROM_NAME,
   },
   google: {
     enabled: googleEnabled,

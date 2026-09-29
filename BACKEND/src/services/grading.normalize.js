@@ -1,22 +1,15 @@
-/**
- * Pure functions that turn raw model output into trustworthy data.
- * The model is never trusted to respect limits: every mark is clamped,
- * every list is capped and every question in the key gets a result.
- */
 const { cleanString, cleanList, pickEnum, roundToHalf } = require("../utils/text");
 
 const LEGIBILITY = ["clear", "partial", "illegible"];
 const CONFIDENCE = ["high", "medium", "low"];
 const COVERAGE = ["full", "partial", "none"];
 
-/** Finds the model's entry for a question, by number first and position second. */
 function entryFor(entries, index) {
   if (!Array.isArray(entries)) return undefined;
   const hasNumber = (entry) =>
     entry?.questionNumber != null && Number.isInteger(Number(entry.questionNumber));
   const byNumber = entries.find((entry) => hasNumber(entry) && Number(entry.questionNumber) === index + 1);
   if (byNumber) return byNumber;
-  // Only fall back to position when the model left out numbering entirely.
   return entries.some(hasNumber) ? undefined : entries[index];
 }
 
@@ -49,10 +42,6 @@ function defaultFeedback(answer) {
   return "";
 }
 
-/**
- * Combines the key, the transcription and the grading into question records.
- * @returns {Array<object>} one record per key question, in key order
- */
 function mergeQuestions(keyQuestions, transcription, grading) {
   const graded = grading && typeof grading === "object" ? grading.questions : undefined;
 
@@ -111,4 +100,4 @@ function mergeOverall(transcription, grading) {
   };
 }
 
-module.exports = { normalizeTranscription, mergeQuestions, mergeOverall, entryFor };
+module.exports = { normalizeTranscription, mergeQuestions, mergeOverall };
