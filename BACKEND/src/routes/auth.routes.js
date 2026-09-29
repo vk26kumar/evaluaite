@@ -111,7 +111,7 @@ router.get("/google", (req, res, next) => {
 router.get("/google/callback", (req, res, next) => {
   if (!config.google.enabled) return redirectToClient(res, "/login?error=google_unavailable");
 
-  passport.authenticate("google", { session: false }, async (err, user) => {
+  passport.authenticate("google", { session: false }, async (err, user, info) => {
     if (err || !user) {
       if (err) logger.warn("Google sign-in failed", { message: err.message });
       return redirectToClient(res, "/login?error=google");
@@ -123,6 +123,7 @@ router.get("/google/callback", (req, res, next) => {
       await AuthCode.create({
         codeHash: sha256(code),
         user: user._id,
+        notice: info?.passwordRemoved ? "password_removed" : undefined,
         expiresAt: new Date(Date.now() + AUTH_CODE_TTL_MS),
       });
       redirectToClient(res, `/auth/callback?code=${encodeURIComponent(code)}`);
@@ -146,7 +147,7 @@ router.post(
     const user = await User.findById(record.user);
     if (!user) throw ApiError.unauthorized("This account no longer exists.");
 
-    res.json(session(user));
+    res.json(record.notice ? { ...session(user), notice: record.notice } : session(user));
   })
 );
 

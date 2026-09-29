@@ -13,10 +13,11 @@ async function connectDatabase() {
   mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected"));
 
   await mongoose.connect(config.mongoUri, {
+    ...(config.mongoDbName ? { dbName: config.mongoDbName } : {}),
     serverSelectionTimeoutMS: 10_000,
     autoIndex: !config.isProd || process.env.MONGO_AUTO_INDEX === "true",
   });
-  logger.info("MongoDB connected");
+  logger.info("MongoDB connected", { database: mongoose.connection.name });
 }
 
 function disconnectDatabase() {

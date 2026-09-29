@@ -12,12 +12,12 @@ export default function ToastProvider({ children }) {
   const dismiss = useCallback((id) => setToasts((list) => list.filter((toast) => toast.id !== id)), []);
 
   const show = useCallback(
-    (tone, message) => {
+    (tone, message, { duration } = {}) => {
       nextId.current += 1;
       const id = nextId.current;
       // Keep at most three on screen; the oldest goes first.
       setToasts((list) => [...list.slice(-2), { id, tone, message }]);
-      setTimeout(() => dismiss(id), DURATION[tone]);
+      setTimeout(() => dismiss(id), duration || DURATION[tone]);
       return id;
     },
     [dismiss]
@@ -25,9 +25,9 @@ export default function ToastProvider({ children }) {
 
   const api = useMemo(
     () => ({
-      success: (message) => show("success", message),
-      error: (message) => show("error", message),
-      info: (message) => show("info", message),
+      success: (message, options) => show("success", message, options),
+      error: (message, options) => show("error", message, options),
+      info: (message, options) => show("info", message, options),
       dismiss,
     }),
     [show, dismiss]

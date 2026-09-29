@@ -43,7 +43,7 @@ Both grading passes use JSON-schema structured output. User-supplied text is fen
 
 ## Local development
 
-Requirements: Node.js 20+, a MongoDB database (MongoDB Atlas works), and a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey).
+Requirements: Node.js 24, a MongoDB database (MongoDB Atlas works), and a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey).
 
 ```bash
 # 1. Backend
@@ -61,14 +61,18 @@ npm run dev                 # http://localhost:5173
 
 In development, the Vite dev server proxies `/api` to `http://localhost:5000`.
 
+Local runs never touch production data: when `MONGO_URI` names no database, development uses its own `evaluaite-dev` database on the same cluster, and the server logs which database it connected to. Set `MONGO_DB_NAME` to choose another.
+
 ### Checks
 
 ```bash
-cd BACKEND  && npm test               # unit + HTTP tests, no database or API key needed
+cd BACKEND  && npm test               # unit, HTTP and database tests; no API key needed (the first run downloads a MongoDB test binary)
 cd BACKEND  && npm run smoke:grade    # grades test/fixtures/sample-answer-sheet.jpg with the real Gemini API
 cd BACKEND  && npm run smoke:paper    # generates a real question paper and writes both PDFs to your temp folder
 cd FRONTEND && npm run lint && npm run build
 ```
+
+GitHub Actions runs the same checks, plus `npm audit`, on every push and pull request (`.github/workflows/ci.yml`).
 
 ## Configuration
 
@@ -77,6 +81,7 @@ cd FRONTEND && npm run lint && npm run build
 | Variable | Required | Description |
 |---|---|---|
 | `MONGO_URI` | yes | MongoDB connection string |
+| `MONGO_DB_NAME` | no | Database to use. Defaults to the one in `MONGO_URI`; if it names none, production uses the driver default (`test`) and development uses `evaluaite-dev`. |
 | `JWT_SECRET` | yes | Session signing secret. **At least 32 characters in production**, or the server refuses to start. |
 | `GEMINI_API_KEY` | for AI | Google AI Studio key. `GEMINI_API` is accepted as a legacy name. |
 | `GEMINI_MODEL` | no | Defaults to `gemini-flash-latest`. Pin a specific model if marks must stay identical across model releases. |
@@ -137,7 +142,8 @@ All routes except auth, providers and health require `Authorization: Bearer <tok
 | `GET` | `/api/assignments/:id/pdf?variant=student\|teacher` | Download the paper as PDF |
 | `GET` | `/api/assignments/:id/evaluations` | Sheets graded against this paper |
 | `GET` / `PATCH` / `DELETE` | `/api/profile` | Profile and stats / update details / delete the account |
-| `POST` | `/api/profile/password` | Change or add a password |
+| `POST` | `/api/profile/password` | Change or add a password; signs out other sessions and returns a new token |
+| `POST` | `/api/profile/sessions/revoke` | Sign out every other session; returns a new token for this one |
 | `GET` | `/api/profile/students`, `/api/profile/activity` | Marks per student / activity history |
 
 Errors always look like `{ "error": { "message", "code", "details?" } }`.
@@ -147,5 +153,19 @@ Errors always look like `{ "error": { "message", "code", "details?" } }`.
 - Every data and AI route requires a valid session; evaluations are scoped to their owner.
 - Passwords are hashed with bcrypt (cost 12); failed logins are rate-limited and don't reveal whether an email exists.
 - Google OAuth uses a CSRF `state` cookie, and the session token never appears in a URL: the app receives a single-use, 60-second code instead.
+- Sessions carry a version number. Changing the password or choosing "Sign out other devices" retires every older session at once.
+- Google sign-in links to an existing account only when Google has verified the email. If that account has a password nobody verified, the password is removed and its sessions end, so an address registered by someone else can't be used to get into the real owner's account.
 - Uploads are limited to 6 files, 10 MB each and 14 MB in total, and their type is checked from file contents, not the browser's claim.
 - Helmet security headers, a CORS allow-list, JSON body limits, per-account AI rate limits and schema validation on every input.
+
+## Maintenance
+
+`BACKEND/scripts/cleanup-legacy-data.js` removes data left by the old version of the app: graded sheets that belong to no account, emails saved with capital letters, and accounts that share an email. It only reports until you pass `--apply`, and it backs up everything it changes to `BACKEND/backups/` (ignored by git) first.
+
+```bash
+cd BACKEND
+npm run cleanup:legacy -- --db test                            # report only
+npm run cleanup:legacy -- --db test --apply                    # back up, then clean up
+npm run cleanup:legacy -- --db test --apply --remove-user <id> # also remove one of two accounts sharing an email
+npm run cleanup:legacy -- --db test --restore backups/<file>.json
+```

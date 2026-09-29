@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { LuCheck, LuEye, LuEyeOff, LuKeyRound, LuTriangleAlert, LuX } from "react-icons/lu";
+import { LuCheck, LuEye, LuEyeOff, LuKeyRound, LuLogOut, LuTriangleAlert, LuX } from "react-icons/lu";
 import { api } from "../../lib/api";
 import { useAuth, useToast } from "../../context/contexts";
 import Field from "../../components/Field";
@@ -143,6 +143,7 @@ function ProfileForm({ user, onSaved }) {
 }
 
 function PasswordForm({ hasPassword, onChanged }) {
+  const { signIn } = useAuth();
   const toast = useToast();
   const [values, setValues] = useState({ currentPassword: "", newPassword: "", confirm: "" });
   const [errors, setErrors] = useState({});
@@ -162,11 +163,17 @@ function PasswordForm({ hasPassword, onChanged }) {
 
     setSaving(true);
     try {
-      const { user } = await api.post("/api/profile/password", {
+      const { user, token } = await api.post("/api/profile/password", {
         currentPassword: hasPassword ? values.currentPassword : undefined,
         newPassword: values.newPassword,
       });
-      toast.success(hasPassword ? "Password changed." : "Password added. You can now sign in with your email too.");
+      // The server signed out every other session; this device keeps going with a fresh token.
+      signIn({ token, user });
+      toast.success(
+        hasPassword
+          ? "Password changed. Any other devices have been signed out."
+          : "Password added. You can now sign in with your email too."
+      );
       setValues({ currentPassword: "", newPassword: "", confirm: "" });
       onChanged(user);
     } catch (err) {
@@ -212,6 +219,34 @@ function PasswordForm({ hasPassword, onChanged }) {
         </button>
       </div>
     </form>
+  );
+}
+
+function SignOutOtherDevices() {
+  const { signIn, user } = useAuth();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      const { token } = await api.post("/api/profile/sessions/revoke");
+      signIn({ token, user });
+      toast.success("Signed out on every other device.");
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="sessions-row">
+      <p className="muted small">Signed in on a shared or lost computer? Sign out everywhere except this device.</p>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={run} data-loading={busy || undefined}>
+        <LuLogOut aria-hidden="true" /> Sign out other devices
+      </button>
+    </div>
   );
 }
 
@@ -310,6 +345,7 @@ export default function AccountTab({ user, onUserChange }) {
             <span className={`badge ${methods.google ? "badge-good" : ""}`}>{methods.google ? "Connected" : "Not connected"}</span>
           </li>
         </ul>
+        <SignOutOtherDevices />
       </section>
 
       <PasswordForm hasPassword={Boolean(methods.password)} onChanged={onUserChange} />

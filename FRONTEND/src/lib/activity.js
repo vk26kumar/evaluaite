@@ -5,6 +5,8 @@ import {
   LuFilePlus,
   LuFileText,
   LuKeyRound,
+  LuLink,
+  LuLogOut,
   LuPencil,
   LuPresentation,
   LuRefreshCw,
@@ -43,6 +45,15 @@ export function describeActivity(item) {
       return { ...base, icon: LuUserRound, text: "Updated your profile details" };
     case "account.password_changed":
       return { ...base, icon: LuKeyRound, text: meta.added ? "Added a password to your account" : "Changed your password" };
+    case "account.google_linked":
+      return {
+        ...base,
+        icon: LuLink,
+        text: "Connected your Google account",
+        detail: meta.passwordRemoved ? "The old password was removed and other devices were signed out" : "",
+      };
+    case "account.sessions_revoked":
+      return { ...base, icon: LuLogOut, text: "Signed out on every other device" };
     case "assignment.created":
       return { ...base, icon: LuFilePlus, text: `Started the question paper ${quote(title)}`, detail: meta.questions ? `${meta.subject} · ${meta.className} · ${meta.questions} questions` : "" };
     case "assignment.generated":

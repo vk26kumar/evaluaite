@@ -10,6 +10,8 @@ const ACTIVITY_TYPES = [
   "account.created",
   "account.updated",
   "account.password_changed",
+  "account.google_linked",
+  "account.sessions_revoked",
   "assignment.created",
   "assignment.generated",
   "assignment.failed",

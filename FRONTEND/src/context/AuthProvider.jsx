@@ -37,9 +37,9 @@ export default function AuthProvider({ children }) {
   // Any request that comes back 401 ends the session everywhere.
   useEffect(
     () =>
-      onSessionExpired(() => {
+      onSessionExpired((error) => {
         setState({ status: "anonymous", user: null });
-        toast.info("Your session expired. Please sign in again.");
+        toast.info(error?.code === "SESSION_REVOKED" ? error.message : "Your session expired. Please sign in again.");
       }),
     [toast]
   );

@@ -8,6 +8,8 @@ const mongoose = require("mongoose");
 const AuthCodeSchema = new mongoose.Schema({
   codeHash: { type: String, required: true, unique: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  // Something the app should tell the user once they are signed in.
+  notice: { type: String, enum: ["password_removed"] },
   expiresAt: { type: Date, required: true, expires: 0 },
 });
 
