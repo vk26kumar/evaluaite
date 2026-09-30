@@ -9,6 +9,8 @@ const UserSchema = new mongoose.Schema(
     avatarUrl: { type: String },
     emailVerified: { type: Boolean, default: false },
     tokenVersion: { type: Number, default: 0 },
+    recoveryCodes: { type: [String], select: false, default: undefined },
+    recoveryCodesCreatedAt: { type: Date },
 
     institution: { type: String, trim: true, maxlength: 120, default: "" },
     designation: { type: String, trim: true, maxlength: 80, default: "" },

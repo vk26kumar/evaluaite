@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const config = require("../src/config/env");
+const { connect } = require("../src/config/db");
 
 const { EJSON } = mongoose.mongo.BSON;
 const { ObjectId } = mongoose.Types;
@@ -197,7 +198,7 @@ async function restore(db, file) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!config.mongoUri) throw new Error("MONGO_URI is not set in BACKEND/.env.");
-  await mongoose.connect(config.mongoUri, { dbName: args.db, serverSelectionTimeoutMS: 15_000 });
+  await connect(config.mongoUri, { dbName: args.db, serverSelectionTimeoutMS: 15_000 });
   const { db } = mongoose.connection;
 
   try {

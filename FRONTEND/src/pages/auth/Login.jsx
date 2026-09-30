@@ -5,7 +5,6 @@ import { useAuth } from "../../context/contexts";
 import { useDocumentTitle } from "../../lib/hooks";
 import { destinationLabel } from "../../lib/features";
 import Field from "../../components/Field";
-import { useProviders } from "../../lib/providers";
 import AuthLayout, { GoogleButton } from "./AuthLayout";
 import PasswordInput from "./PasswordInput";
 
@@ -26,7 +25,6 @@ export default function Login() {
   const [formError, setFormError] = useState(OAUTH_ERRORS[params.get("error")] || "");
   const [submitting, setSubmitting] = useState(false);
   const destination = destinationLabel(location.state?.from);
-  const providers = useProviders();
 
   const update = (name) => (event) => {
     setValues((current) => ({ ...current, [name]: event.target.value }));
@@ -92,13 +90,11 @@ export default function Login() {
           error={fieldErrors.password}
           autoComplete="current-password"
         />
-        {providers.email && (
-          <p className="auth-row">
-            <Link to="/forgot-password" state={{ email: values.email.trim() }}>
-              Forgot password?
-            </Link>
-          </p>
-        )}
+        <p className="auth-row">
+          <Link to="/forgot-password" state={{ email: values.email.trim() }}>
+            Forgot password?
+          </Link>
+        </p>
         <button type="submit" className="btn btn-ink btn-lg btn-block" data-loading={submitting || undefined}>
           Sign in
         </button>

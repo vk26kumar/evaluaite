@@ -17,7 +17,7 @@ Every feature is visible in the navigation to anyone; using one requires signing
 - **Private by design.** Uploaded pages are processed in memory and never written to disk or the database.
 - **Question papers.** Pick question types (multiple choice, true/false, fill in the blanks, short, long, numerical, diagram), counts, marks and a difficulty mix, and optionally upload a chapter. AI writes the paper and an answer key. Edit any question, write a new version, copy it, and download a student PDF or a teacher PDF with the answer key.
 - **Paper → grading in one click.** "Grade sheets" turns the paper's answer key into the grading key, and results collect on the paper per student.
-- **Account recovery.** Forgot-password emails, email confirmation, "sign out other devices", and a notice by email whenever the password changes.
+- **Account recovery without outside services.** Users save 10 one-time recovery codes from Profile, Account, and use one under "Forgot password?" to set a new password. If an email provider is configured, reset links by email and email confirmation are also offered.
 - **Profile.** Your details (the school name prints on new papers), headline stats, every student's marks across sheets with trends and CSV export, and a history of everything you created, copied, regenerated, graded, adjusted and deleted.
 - Light ("paper") and dark ("chalkboard") themes, responsive layout, keyboard and screen-reader support, print-ready reports.
 
@@ -84,7 +84,7 @@ Local runs never touch production data: when `MONGO_URI` names no database, deve
 ### Checks
 
 ```bash
-cd BACKEND  && npm run lint && npm test   # 70 unit, HTTP and database tests; no API key needed (the first run downloads a MongoDB test binary)
+cd BACKEND  && npm run lint && npm test   # 75 unit, HTTP and database tests; no API key needed (the first run downloads a MongoDB test binary)
 cd BACKEND  && npm run smoke:grade    # grades test/fixtures/sample-answer-sheet.jpg with the real Gemini API
 cd BACKEND  && npm run smoke:paper    # generates a real question paper and writes both PDFs to your temp folder
 cd FRONTEND && npm run lint && npm run build
@@ -140,7 +140,7 @@ No secrets belong in the frontend. Every `VITE_` variable is embedded in the pub
 
 **Google sign-in:** in Google Cloud Console, add `<backend URL>/api/auth/google/callback` as an authorised redirect URI.
 
-**Email (Brevo, free for 300 emails a day, no domain needed):**
+**Email (optional; recovery codes work without it). Brevo is free for 300 emails a day and needs no domain:**
 1. Create an account at brevo.com.
 2. Under **Senders, domains & dedicated IPs**, add a sender and confirm the address from the email Brevo sends you.
 3. Under **SMTP & API, API keys**, create a key.
@@ -164,6 +164,7 @@ All routes except auth, providers and health require `Authorization: Bearer <tok
 | `GET` | `/api/auth/me` | Current user |
 | `POST` | `/api/auth/password/forgot`, `/api/auth/password/reset` | Email a reset link / set a new password with it |
 | `POST` | `/api/auth/email/verify` | Confirm an email address with the emailed link |
+| `POST` | `/api/auth/password/recover` | Set a new password with an email address and a recovery code |
 | `GET` | `/api/auth/google` → `/api/auth/google/callback` | Google OAuth; returns a one-time code to the app |
 | `POST` | `/api/auth/google/exchange` | Swap the one-time code for a session |
 | `GET` / `POST` | `/api/evaluations` | List (paginated) / create (multipart: `files[]` + `payload` JSON) |
@@ -181,6 +182,7 @@ All routes except auth, providers and health require `Authorization: Bearer <tok
 | `POST` | `/api/profile/password` | Change or add a password; signs out other sessions and returns a new token |
 | `POST` | `/api/profile/sessions/revoke` | Sign out every other session; returns a new token for this one |
 | `POST` | `/api/profile/email/verification` | Send a new confirmation email |
+| `GET` / `POST` | `/api/profile/recovery-codes` | How many codes are left / create a new set (needs the password) |
 | `GET` | `/api/profile/students`, `/api/profile/activity` | Marks per student / activity history |
 
 Errors always look like `{ "error": { "message", "code", "details?", "requestId?" } }`. Every response carries an `X-Request-Id` header that matches the server log.

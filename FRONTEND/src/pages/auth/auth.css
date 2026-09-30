@@ -109,6 +109,23 @@
   font-weight: 500;
 }
 
+.auth-switch {
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.auth-link {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-link:hover {
+  color: var(--ink);
+}
+
 .auth-footer {
   margin-top: var(--space-5);
   text-align: center;

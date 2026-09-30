@@ -300,3 +300,83 @@ test("deleting an account needs the password when it has one", async () => {
   assert.equal(ok.status, 204);
   assert.equal((await me(token)).status, 401);
 });
+
+async function createCodes(token, password = PASSWORD) {
+  const res = await call("POST", "/api/profile/recovery-codes", { token, body: { password } });
+  assert.equal(res.status, 200);
+  return res.body.codes;
+}
+
+test("recovery codes need the password to create and are shown once", async () => {
+  const { token } = await signUp("codes@school.example");
+  const refused = await call("POST", "/api/profile/recovery-codes", { token, body: { password: WRONG_PASSWORD } });
+  assert.equal(refused.status, 400);
+
+  const codes = await createCodes(token);
+  assert.equal(codes.length, 10);
+  assert.equal(new Set(codes).size, 10);
+  assert.ok(codes.every((code) => /^[A-Z2-9]{5}-[A-Z2-9]{5}$/.test(code)));
+
+  const status = await call("GET", "/api/profile/recovery-codes", { token });
+  assert.equal(status.body.remaining, 10);
+  assert.equal(JSON.stringify(status.body).includes(codes[0]), false, "codes are never returned again");
+
+  const stored = await User.findByEmail("codes@school.example").select("+recoveryCodes");
+  assert.ok(!stored.recoveryCodes.includes(codes[0]), "only hashes are stored");
+});
+
+test("a recovery code resets the password once and signs out other sessions", async () => {
+  const { token } = await signUp("recover@school.example");
+  const codes = await createCodes(token);
+
+  const wrong = await call("POST", "/api/auth/password/recover", {
+    body: { email: "recover@school.example", code: "AAAAA-AAAAA", password: NEW_PASSWORD },
+  });
+  assert.equal(wrong.status, 400);
+  assert.equal(wrong.body.error.details[0].field, "code");
+
+  const res = await call("POST", "/api/auth/password/recover", {
+    body: { email: "Recover@School.example", code: codes[3].toLowerCase().replace("-", " "), password: NEW_PASSWORD },
+  });
+  assert.equal(res.status, 200, "codes are forgiving about case and separators");
+  assert.equal(res.body.codesLeft, 9);
+  assert.equal((await me(res.body.token)).status, 200);
+  assert.equal((await me(token)).status, 401, "other sessions are signed out");
+  assert.equal((await logIn("recover@school.example", NEW_PASSWORD)).status, 200);
+
+  const reused = await call("POST", "/api/auth/password/recover", {
+    body: { email: "recover@school.example", code: codes[3], password: OTHER_PASSWORD },
+  });
+  assert.equal(reused.status, 400, "each code works once");
+  assert.ok(await waitForActivity({ type: "account.password_recovered" }));
+});
+
+test("new recovery codes replace the old ones", async () => {
+  const { token } = await signUp("regen@school.example");
+  const first = await createCodes(token);
+  await createCodes(token);
+  const res = await call("POST", "/api/auth/password/recover", {
+    body: { email: "regen@school.example", code: first[0], password: NEW_PASSWORD },
+  });
+  assert.equal(res.status, 400);
+});
+
+test("a code for one account doesn't work on another", async () => {
+  const { token } = await signUp("owner-a@school.example");
+  await signUp("owner-b@school.example");
+  const codes = await createCodes(token);
+  const res = await call("POST", "/api/auth/password/recover", {
+    body: { email: "owner-b@school.example", code: codes[0], password: NEW_PASSWORD },
+  });
+  assert.equal(res.status, 400);
+});
+
+test("codes made by whoever registered an address first stop working when Google links it", async () => {
+  const { token } = await signUp("squatted@school.example");
+  const codes = await createCodes(token);
+  await findOrCreateGoogleUser(googleProfile("g-squatted", "squatted@school.example", true));
+  const res = await call("POST", "/api/auth/password/recover", {
+    body: { email: "squatted@school.example", code: codes[0], password: NEW_PASSWORD },
+  });
+  assert.equal(res.status, 400);
+});
