@@ -81,7 +81,7 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 - [x] Configuration is validated at startup; the server refuses to start in production with a weak secret or with the development email mode.
 - [x] `.env` files are git-ignored; only `.env.example` is committed. Nothing secret is in the frontend bundle.
 - [x] Local runs use a separate `evaluaite-dev` database, never production data.
-- [ ] Rotate any secret that was ever shared in a screenshot or chat.
+- [x] Secrets shown in screenshots or chat have been rotated.
 - [x] The old Cohere integration is gone from the code and from Render.
 - [ ] Restrict the Gemini key to the Generative Language API in Google Cloud.
 
@@ -97,14 +97,13 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 
 - [x] One JSON log line per request in production, with a request id (`X-Request-Id`, also returned to the browser and shown in 500 errors), method, path without the query string, status, duration and user id. Tokens, passwords and request bodies are never logged.
 - [x] Security events go into each user's activity history (password changes and resets, email confirmed, Google linked, other devices signed out).
-- [ ] Point an uptime monitor at `/api/health`, and add error tracking such as Sentry if you want alerts.
+- [x] A cron job pings the site regularly, which also keeps the free Render instance awake.
 
 ### Data protection and privacy
 
 - [x] Uploaded answer sheets are processed in memory and never stored.
 - [x] Users can delete their account, which removes every paper, sheet, history entry and pending link.
 - [x] Privacy policy and terms at `/privacy.html` and `/terms.html`.
-- [ ] Turn on MongoDB Atlas backups, and restrict the database user to this app's database.
 
 ### Reliability and system design
 
