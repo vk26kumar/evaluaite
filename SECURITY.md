@@ -83,7 +83,7 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 - [x] Local runs use a separate `evaluaite-dev` database, never production data.
 - [x] Secrets shown in screenshots or chat have been rotated.
 - [x] The old Cohere integration is gone from the code and from Render.
-- [ ] Restrict the Gemini key to the Generative Language API in Google Cloud.
+- [ ] If Gemini billing is ever turned on: restrict the key to the Generative Language API and set a Google Cloud budget alert. (Billing is off, so a leaked key can only use the free quota.)
 
 ### Dependencies and CI
 
