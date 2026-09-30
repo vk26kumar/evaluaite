@@ -56,7 +56,7 @@ function session(user) {
 }
 
 function redirectToClient(res, path) {
-  res.redirect(`${config.clientUrl}/#${path}`);
+  res.redirect(`${config.clientUrl}${path}`);
 }
 
 function requireEmail() {

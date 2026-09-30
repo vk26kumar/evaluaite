@@ -23,7 +23,7 @@ function consumeToken(token, purpose) {
   return EmailToken.findOneAndDelete({ tokenHash: sha256(String(token)), purpose, expiresAt: { $gt: new Date() } });
 }
 
-const appLink = (path, token) => `${config.clientUrl}/#${path}?token=${encodeURIComponent(token)}`;
+const appLink = (path, token) => `${config.clientUrl}${path}?token=${encodeURIComponent(token)}`;
 
 async function deliver(user, message, kind) {
   try {

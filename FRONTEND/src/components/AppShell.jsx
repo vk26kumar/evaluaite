@@ -132,7 +132,7 @@ function Header() {
   return (
     <header className={`site-header no-print${scrolled ? " is-scrolled" : ""}`}>
       <div className="container header-inner">
-        <Logo to={isAuthenticated ? "/evaluations" : "/"} />
+        <Logo />
 
         <nav className="main-nav" aria-label="Main">
           {NAV.map(({ to, label, icon: Icon, blurb }) => (

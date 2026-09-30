@@ -150,7 +150,7 @@ Once you own a domain, Resend (`EMAIL_PROVIDER=resend`) is a good alternative, a
 
 **Security headers:** add the static-site headers listed in [SECURITY.md](SECURITY.md#render-static-site-headers).
 
-The app uses hash-based routes (`/#/evaluate`), so the static site needs no rewrite rules.
+The app uses normal URLs (`/evaluations`), so the static site needs one rewrite rule: in Render, open the frontend, then **Redirects/Rewrites**, and add Source `/*`, Destination `/index.html`, Action **Rewrite**. Real files such as `/privacy.html` are still served directly. Old links with `/#/` are converted automatically.
 
 ## API overview
 
