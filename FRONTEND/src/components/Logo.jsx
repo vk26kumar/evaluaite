@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function LogoMark({ size = 30 }) {
   return (
@@ -16,9 +16,13 @@ function LogoMark({ size = 30 }) {
   );
 }
 
-export default function Logo({ to = "/" }) {
+export default function Logo() {
+  const { pathname } = useLocation();
+  const onClick = () => {
+    if (pathname === "/") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   return (
-    <Link to={to} className="logo" aria-label="AI-EvaluAIte home">
+    <Link to="/" className="logo" aria-label="AI-EvaluAIte home" onClick={onClick}>
       <LogoMark />
       <span className="logo-word">
         Evalu<em>AI</em>te

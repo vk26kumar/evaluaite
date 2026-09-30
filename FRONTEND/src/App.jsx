@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import AppShell from "./components/AppShell";
 import { PublicOnly, RequireAuth } from "./components/RouteGuards";
 import { PageLoader } from "./components/Feedback";
@@ -32,7 +32,7 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -64,6 +64,6 @@ export default function App() {
           </Route>
         </Routes>
       </Suspense>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
