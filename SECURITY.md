@@ -17,7 +17,7 @@ Email **vkumar26062003@gmail.com** with the steps to reproduce. Please don't ope
 - [x] `Cache-Control: no-store` on every API response, and ETags off, so private data isn't cached by browsers or proxies.
 - [x] CORS allow-list: only the origins in `CLIENT_URL` can call the API from a browser.
 - [x] Frontend Content Security Policy, built into `index.html` at build time: scripts only from the site itself plus a hash of the one inline theme script, API calls only to `VITE_API_URL`, no plugins, no `<base>` tricks.
-- [ ] Add the static-site headers below in the Render dashboard (a `<meta>` CSP can't block framing).
+- [x] Static-site headers below are set in the Render dashboard (a `<meta>` CSP can't block framing).
 
 ### Authentication and sessions
 
@@ -82,7 +82,7 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 - [x] `.env` files are git-ignored; only `.env.example` is committed. Nothing secret is in the frontend bundle.
 - [x] Local runs use a separate `evaluaite-dev` database, never production data.
 - [ ] Rotate any secret that was ever shared in a screenshot or chat.
-- [ ] Remove `VITE_COHERE_API_KEY` from the Render frontend and revoke that key.
+- [x] The old Cohere integration is gone from the code and from Render.
 - [ ] Restrict the Gemini key to the Generative Language API in Google Cloud.
 
 ### Dependencies and CI
