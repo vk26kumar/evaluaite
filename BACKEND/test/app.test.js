@@ -2,6 +2,7 @@ require("./setup");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createApp } = require("../src/app");
+const { COMMON_PASSWORDS } = require("../src/utils/password");
 
 let server;
 let base;
@@ -111,7 +112,8 @@ test("tokens signed with another algorithm are rejected", async () => {
 });
 
 test("weak and common passwords are refused at sign-up", async () => {
-  for (const password of ["Password123", "qwerty123", "a".repeat(70) + "1é"]) {
+  const common = [...COMMON_PASSWORDS];
+  for (const password of [common[0].toUpperCase(), common[1], "a".repeat(70) + "1é"]) {
     const res = await fetch(`${base}/api/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

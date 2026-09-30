@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const path = require("path");
+const { randomSecret } = require("./credentials");
 const { spawn } = require("child_process");
 
 const START = "require('./src/app').createApp().listen(0, function () { process.stdout.write('PORT=' + this.address().port + '\\n'); })";
@@ -12,7 +13,7 @@ async function startWithLimits() {
       PATH: process.env.PATH,
       SYSTEMROOT: process.env.SYSTEMROOT,
       NODE_ENV: "development",
-      JWT_SECRET: "a-test-secret-that-is-long-enough-for-production",
+      JWT_SECRET: randomSecret(),
       MONGO_URI: "",
       EMAIL_PROVIDER: "none",
       GEMINI_API_KEY: "",

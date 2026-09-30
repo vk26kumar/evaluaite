@@ -46,22 +46,27 @@ export default function ActivityTimeline({ compact = false, limit = 20 }) {
   const [error, setError] = useState(null);
 
   const load = useCallback(
-    async (nextPage, signal) => {
-      setStatus(nextPage === 1 ? "loading" : "more");
-      try {
-        const data = await api.get(`/api/profile/activity?page=${nextPage}&limit=${limit}&category=${category}`, { signal });
-        setItems((current) => (nextPage === 1 ? data.items : [...current, ...data.items]));
-        setPage(data.page);
-        setTotalPages(data.totalPages);
-        setStatus("ready");
-      } catch (err) {
-        if (signal?.aborted) return;
-        setError(err);
-        setStatus("error");
-      }
-    },
+    (nextPage, signal) =>
+      api
+        .get(`/api/profile/activity?page=${nextPage}&limit=${limit}&category=${category}`, { signal })
+        .then((data) => {
+          setItems((current) => (nextPage === 1 ? data.items : [...current, ...data.items]));
+          setPage(data.page);
+          setTotalPages(data.totalPages);
+          setStatus("ready");
+        })
+        .catch((err) => {
+          if (signal?.aborted) return;
+          setError(err);
+          setStatus("error");
+        }),
     [category, limit]
   );
+
+  const reload = (nextPage) => {
+    setStatus(nextPage === 1 ? "loading" : "more");
+    load(nextPage);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,7 +86,10 @@ export default function ActivityTimeline({ compact = false, limit = 20 }) {
       {!compact && (
         <div className="segmented activity-filters" role="group" aria-label="Filter history">
           {ACTIVITY_CATEGORIES.map((option) => (
-            <button key={option.value} type="button" aria-pressed={category === option.value} onClick={() => setCategory(option.value)}>
+            <button key={option.value} type="button" aria-pressed={category === option.value} onClick={() => {
+                setCategory(option.value);
+                setStatus("loading");
+              }}>
               {option.label}
             </button>
           ))}
@@ -96,7 +104,7 @@ export default function ActivityTimeline({ compact = false, limit = 20 }) {
         </div>
       )}
 
-      {status === "error" && <ErrorState message={error?.message} onRetry={() => load(1)} />}
+      {status === "error" && <ErrorState message={error?.message} onRetry={() => reload(1)} />}
 
       {status !== "loading" && status !== "error" && items.length === 0 && (
         <p className="history-none">
@@ -117,7 +125,7 @@ export default function ActivityTimeline({ compact = false, limit = 20 }) {
 
       {!compact && page < totalPages && (
         <div className="history-more">
-          <button type="button" className="btn" onClick={() => load(page + 1)} data-loading={status === "more" || undefined}>
+          <button type="button" className="btn" onClick={() => reload(page + 1)} data-loading={status === "more" || undefined}>
             Show older activity
           </button>
         </div>

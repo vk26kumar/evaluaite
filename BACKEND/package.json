@@ -31,13 +31,13 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.20.2",
-    "pptxgenjs": "^3.12.0",
+    "pptxgenjs": "^4.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
-    "eslint": "^9.39.5",
-    "globals": "^16.5.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
     "mongodb-memory-server-core": "^11.3.0",
     "nodemon": "^3.1.14"
   },

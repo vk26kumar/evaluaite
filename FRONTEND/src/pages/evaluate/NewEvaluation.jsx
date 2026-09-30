@@ -46,7 +46,7 @@ export default function NewEvaluation() {
   const [questions, setQuestions] = useState(initial.questions);
   const [assignment, setAssignment] = useState(initial.assignment);
   const [pages, setPages] = useState([]);
-  const [errors, setErrors] = useState(null);
+  const [showErrors, setShowErrors] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -60,15 +60,15 @@ export default function NewEvaluation() {
   const totalBytes = useMemo(() => pages.reduce((sum, page) => sum + page.file.size, 0), [pages]);
   const totalMarks = questions.reduce((sum, q) => sum + (Number(q.maxMarks) || 0), 0);
 
-  useEffect(() => {
-    if (errors) setErrors(validate({ title, questions, pages, totalBytes, maxTotalBytes: MAX_TOTAL_BYTES }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, questions, pages, totalBytes]);
+  const errors = useMemo(
+    () => (showErrors ? validate({ title, questions, pages, totalBytes, maxTotalBytes: MAX_TOTAL_BYTES }) : null),
+    [showErrors, title, questions, pages, totalBytes]
+  );
 
   const onSubmit = async (event) => {
     event.preventDefault();
     const found = validate({ title, questions, pages, totalBytes, maxTotalBytes: MAX_TOTAL_BYTES });
-    setErrors(found);
+    setShowErrors(Boolean(found));
     if (found) {
       toast.error("A few things need attention before grading.");
       scrollToFirstError();
@@ -109,7 +109,7 @@ export default function NewEvaluation() {
     setDifficulty("Medium");
     setQuestions([newQuestion()]);
     setAssignment(null);
-    setErrors(null);
+    setShowErrors(false);
     setConfirmClear(false);
     toast.info("Answer key cleared.");
   };

@@ -44,13 +44,14 @@ export default function Slides() {
   const [stage, setStage] = useState(0);
   const [result, setResult] = useState(null);
   const resultRef = useRef(null);
-  resultRef.current = result;
+  useEffect(() => {
+    resultRef.current = result;
+  }, [result]);
 
   useEffect(() => () => resultRef.current && URL.revokeObjectURL(resultRef.current.url), []);
 
   useEffect(() => {
     if (!generating) return undefined;
-    setStage(0);
     const timer = setInterval(() => setStage((value) => Math.min(value + 1, STAGES.length - 1)), 4500);
     return () => clearInterval(timer);
   }, [generating]);
@@ -71,6 +72,7 @@ export default function Slides() {
       return;
     }
     setError("");
+    setStage(0);
     setGenerating(true);
     try {
       const response = await request("/api/slides", {

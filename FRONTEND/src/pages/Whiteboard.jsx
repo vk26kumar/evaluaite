@@ -112,10 +112,14 @@ export default function Whiteboard() {
   const [tool, setTool] = useState("pen");
   const [color, setColor] = useState(COLORS[0].value);
   const [size, setSize] = useState(4);
-  const [, setVersion] = useState(0);
-  const bump = () => setVersion((value) => value + 1);
-
-  const hasContent = strokes.current.some((stroke) => stroke.tool !== "clear");
+  const [history, setHistory] = useState({ hasContent: false, canUndo: false, canRedo: false });
+  const bump = () =>
+    setHistory({
+      hasContent: strokes.current.some((stroke) => stroke.tool !== "clear"),
+      canUndo: strokes.current.length > 0,
+      canRedo: redoStack.current.length > 0,
+    });
+  const { hasContent, canUndo, canRedo } = history;
   useBeforeUnload(hasContent);
 
   useEffect(() => {
@@ -258,8 +262,6 @@ export default function Whiteboard() {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo]);
 
-  const canUndo = strokes.current.length > 0;
-  const canRedo = redoStack.current.length > 0;
 
   return (
     <div className="board-page">

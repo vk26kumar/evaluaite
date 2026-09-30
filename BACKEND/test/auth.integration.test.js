@@ -12,6 +12,8 @@ const Activity = require("../src/models/Activity");
 const AuthCode = require("../src/models/AuthCode");
 const { findOrCreateGoogleUser } = require("../src/config/passport");
 const { signSessionToken, sha256 } = require("../src/services/token.service");
+const { COMMON_PASSWORDS } = require("../src/utils/password");
+const { PASSWORD, NEW_PASSWORD, OTHER_PASSWORD, WRONG_PASSWORD } = require("./credentials");
 
 let mongo;
 let server;
@@ -45,13 +47,13 @@ async function call(method, path, { token, body } = {}) {
   return { status: res.status, body: text ? JSON.parse(text) : null };
 }
 
-async function signUp(email, password = "chalk1234") {
+async function signUp(email, password = PASSWORD) {
   const res = await call("POST", "/api/auth/signup", { body: { name: "Test Teacher", email, password } });
   assert.equal(res.status, 201);
   return res.body;
 }
 
-const logIn = (email, password = "chalk1234") => call("POST", "/api/auth/login", { body: { email, password } });
+const logIn = (email, password = PASSWORD) => call("POST", "/api/auth/login", { body: { email, password } });
 const me = (token) => call("GET", "/api/auth/me", { token });
 
 const googleProfile = (id, email, verified) => ({
@@ -76,7 +78,7 @@ test("changing the password signs out other sessions and keeps this one", async 
 
   const res = await call("POST", "/api/profile/password", {
     token: thisDevice,
-    body: { currentPassword: "chalk1234", newPassword: "newchalk99" },
+    body: { currentPassword: PASSWORD, newPassword: NEW_PASSWORD },
   });
   assert.equal(res.status, 200);
   assert.ok(res.body.token, "returns a fresh token for this device");
@@ -88,7 +90,7 @@ test("changing the password signs out other sessions and keeps this one", async 
   assert.equal((await me(res.body.token)).status, 200);
 
   assert.equal((await logIn("change@school.example")).status, 401, "old password no longer works");
-  assert.equal((await logIn("change@school.example", "newchalk99")).status, 200);
+  assert.equal((await logIn("change@school.example", NEW_PASSWORD)).status, 200);
 });
 
 test("signing out other devices retires every older token", async () => {
@@ -132,18 +134,18 @@ test("linking Google removes a password nobody verified and signs out its sessio
   assert.equal(activity?.meta.passwordRemoved, true);
 
   const session = signSessionToken(stored);
-  const added = await call("POST", "/api/profile/password", { token: session, body: { newPassword: "owner12345" } });
+  const added = await call("POST", "/api/profile/password", { token: session, body: { newPassword: OTHER_PASSWORD } });
   assert.equal(added.status, 200);
   const again = await findOrCreateGoogleUser(googleProfile("g-claimed", "claimed@school.example", true));
   assert.equal(again.passwordRemoved, false);
-  assert.equal((await logIn("claimed@school.example", "owner12345")).status, 200);
+  assert.equal((await logIn("claimed@school.example", OTHER_PASSWORD)).status, 200);
 });
 
 test("linking Google keeps the password when the address was already verified", async () => {
   await User.create({
     name: "Verified Teacher",
     email: "verified@school.example",
-    password: await bcrypt.hash("chalk1234", 4),
+    password: await bcrypt.hash(PASSWORD, 4),
     emailVerified: true,
   });
   const { passwordRemoved } = await findOrCreateGoogleUser(googleProfile("g-verified", "verified@school.example", true));
@@ -220,20 +222,20 @@ test("a reset link sets a new password, signs out other sessions and works once"
   const link = tokenIn(await nextEmail("reset@school.example", /reset/i));
   assert.ok(link);
 
-  const weak = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "password123" } });
+  const weak = await call("POST", "/api/auth/password/reset", { body: { token: link, password: [...COMMON_PASSWORDS][0] } });
   assert.equal(weak.status, 400);
-  const personal = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "reset12345" } });
+  const personal = await call("POST", "/api/auth/password/reset", { body: { token: link, password: `reset${NEW_PASSWORD}` } });
   assert.equal(personal.status, 400, "a password containing the email name is refused");
 
-  const res = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "brandnew42" } });
+  const res = await call("POST", "/api/auth/password/reset", { body: { token: link, password: NEW_PASSWORD } });
   assert.equal(res.status, 200, "refused attempts didn't use up the link");
   assert.equal((await me(res.body.token)).status, 200, "signs the user in");
   assert.equal(res.body.user.emailVerified, true, "resetting proves the inbox belongs to them");
   assert.equal((await me(oldSession)).status, 401);
-  assert.equal((await logIn("reset@school.example", "brandnew42")).status, 200);
+  assert.equal((await logIn("reset@school.example", NEW_PASSWORD)).status, 200);
   assert.ok(await nextEmail("reset@school.example", /changed/i), "sends a password-changed notice");
 
-  const reused = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "another42x" } });
+  const reused = await call("POST", "/api/auth/password/reset", { body: { token: link, password: OTHER_PASSWORD } });
   assert.equal(reused.status, 400);
 });
 
@@ -243,9 +245,9 @@ test("a newer reset email replaces the older link", async () => {
   const first = tokenIn(await nextEmail("twice@school.example", /reset/i));
   await call("POST", "/api/auth/password/forgot", { body: { email: "twice@school.example" } });
   const second = tokenIn(await nextEmail("twice@school.example", /reset/i));
-  const old = await call("POST", "/api/auth/password/reset", { body: { token: first, password: "brandnew42" } });
+  const old = await call("POST", "/api/auth/password/reset", { body: { token: first, password: NEW_PASSWORD } });
   assert.equal(old.status, 400);
-  const fresh = await call("POST", "/api/auth/password/reset", { body: { token: second, password: "brandnew42" } });
+  const fresh = await call("POST", "/api/auth/password/reset", { body: { token: second, password: NEW_PASSWORD } });
   assert.equal(fresh.status, 200);
 });
 
@@ -259,7 +261,7 @@ test("expired reset links are refused", async () => {
     tokenHash: sha256(link),
     expiresAt: new Date(Date.now() - 1000),
   });
-  const res = await call("POST", "/api/auth/password/reset", { body: { token: link, password: "brandnew42" } });
+  const res = await call("POST", "/api/auth/password/reset", { body: { token: link, password: NEW_PASSWORD } });
   assert.equal(res.status, 400);
 });
 
@@ -290,11 +292,11 @@ test("an unconfirmed user can ask for a new confirmation email", async () => {
 
 test("deleting an account needs the password when it has one", async () => {
   const { token } = await signUp("leaving@school.example");
-  const wrong = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE", password: "not-mine-1" } });
+  const wrong = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE", password: WRONG_PASSWORD } });
   assert.equal(wrong.status, 400);
   const missing = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE" } });
   assert.equal(missing.status, 400);
-  const ok = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE", password: "chalk1234" } });
+  const ok = await call("DELETE", "/api/profile", { token, body: { confirm: "DELETE", password: PASSWORD } });
   assert.equal(ok.status, 204);
   assert.equal((await me(token)).status, 401);
 });
