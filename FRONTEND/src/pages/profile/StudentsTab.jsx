@@ -67,7 +67,6 @@ export default function StudentsTab() {
   const [open, setOpen] = useState(() => new Set());
 
   const load = useCallback((signal) => {
-    setState((current) => ({ ...current, status: "loading" }));
     api
       .get("/api/profile/students", { signal })
       .then((data) => setState({ status: "ready", students: data.students, unnamedSheets: data.unnamedSheets }))
@@ -112,7 +111,10 @@ export default function StudentsTab() {
       </div>
     );
   }
-  if (state.status === "error") return <ErrorState message={state.error.message} onRetry={() => load()} />;
+  if (state.status === "error") return <ErrorState message={state.error.message} onRetry={() => {
+          setState((current) => ({ ...current, status: "loading" }));
+          load();
+        }} />;
 
   if (state.students.length === 0) {
     return (

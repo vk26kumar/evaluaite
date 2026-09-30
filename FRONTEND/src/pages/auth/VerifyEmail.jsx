@@ -11,23 +11,20 @@ export default function VerifyEmail() {
   useDocumentTitle("Confirm your email");
   const [params] = useSearchParams();
   const { isAuthenticated, user, updateUser } = useAuth();
-  const [state, setState] = useState({ status: "working", message: "" });
+  const token = params.get("token");
+  const [state, setState] = useState(() =>
+    token ? { status: "working", message: "" } : { status: "error", message: "This link is incomplete. Open the link from the email again." }
+  );
   const started = useRef(false);
 
   useEffect(() => {
-    if (started.current) return;
+    if (started.current || !token) return;
     started.current = true;
-
-    const token = params.get("token");
-    if (!token) {
-      setState({ status: "error", message: "This link is incomplete. Open the link from the email again." });
-      return;
-    }
     api
       .post("/api/auth/email/verify", { token })
       .then(() => setState({ status: "done", message: "" }))
       .catch((err) => setState({ status: "error", message: err.message }));
-  }, [params]);
+  }, [token]);
 
   useEffect(() => {
     if (state.status === "done" && user && !user.emailVerified) updateUser({ ...user, emailVerified: true });

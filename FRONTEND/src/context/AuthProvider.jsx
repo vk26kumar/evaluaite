@@ -9,20 +9,16 @@ export default function AuthProvider({ children }) {
     user: null,
   }));
 
-  const verify = useCallback(async (signal) => {
-    if (!session.getToken()) {
-      setState({ status: "anonymous", user: null });
-      return;
-    }
-    try {
-      const { user } = await api.get("/api/auth/me", { signal, timeout: 70_000 });
-      setState({ status: "authenticated", user });
-    } catch (error) {
-      if (signal?.aborted) return;
-      if (error.status === 401) setState({ status: "anonymous", user: null });
-      else setState({ status: "unreachable", user: null });
-    }
-  }, []);
+  const verify = useCallback(
+    (signal) =>
+      (session.getToken() ? api.get("/api/auth/me", { signal, timeout: 70_000 }) : Promise.reject({ status: 401 }))
+        .then(({ user }) => setState({ status: "authenticated", user }))
+        .catch((error) => {
+          if (signal?.aborted) return;
+          setState({ status: error.status === 401 ? "anonymous" : "unreachable", user: null });
+        }),
+    []
+  );
 
   useEffect(() => {
     if (state.status !== "checking") return undefined;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/contexts";
 import { ErrorState, PageLoader } from "./Feedback";
@@ -7,10 +7,7 @@ export function RequireAuth() {
   const { status, retry, exitTo } = useAuth();
   const location = useLocation();
   const [wasSignedIn, setWasSignedIn] = useState(status === "authenticated");
-
-  useEffect(() => {
-    if (status === "authenticated") setWasSignedIn(true);
-  }, [status]);
+  if (status === "authenticated" && !wasSignedIn) setWasSignedIn(true);
 
   if (status === "checking") return <PageLoader label="Checking your session…" />;
   if (status === "unreachable") {

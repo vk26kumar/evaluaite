@@ -130,31 +130,40 @@ export default function AssignmentsList() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setQuery(search.trim()), 300);
+    const timer = setTimeout(() => {
+      setQuery(search.trim());
+      setStatus("loading");
+    }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   const load = useCallback(
-    async (nextPage, { signal, silent = false } = {}) => {
-      if (!silent) setStatus(nextPage === 1 ? "loading" : "more");
+    (nextPage, { signal } = {}) => {
       const params = new URLSearchParams({ page: String(nextPage), limit: "18" });
       if (query) params.set("search", query);
       if (filter) params.set("status", filter);
-      try {
-        const data = await api.get(`/api/assignments?${params}`, { signal });
-        setItems((current) => (nextPage === 1 ? data.items : [...current, ...data.items]));
-        setPage(data.page);
-        setTotalPages(data.totalPages);
-        setTotal(data.total);
-        setStatus("ready");
-      } catch (err) {
-        if (signal?.aborted) return;
-        setError(err);
-        setStatus("error");
-      }
+      return api
+        .get(`/api/assignments?${params}`, { signal })
+        .then((data) => {
+          setItems((current) => (nextPage === 1 ? data.items : [...current, ...data.items]));
+          setPage(data.page);
+          setTotalPages(data.totalPages);
+          setTotal(data.total);
+          setStatus("ready");
+        })
+        .catch((err) => {
+          if (signal?.aborted) return;
+          setError(err);
+          setStatus("error");
+        });
     },
     [query, filter]
   );
+
+  const reload = (nextPage) => {
+    setStatus(nextPage === 1 ? "loading" : "more");
+    load(nextPage);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -165,7 +174,7 @@ export default function AssignmentsList() {
   const generating = items.some((item) => IN_PROGRESS.includes(item.status));
   useEffect(() => {
     if (!generating) return undefined;
-    const timer = setTimeout(() => load(1, { silent: true }), 4000);
+    const timer = setTimeout(() => load(1), 4000);
     return () => clearTimeout(timer);
   }, [generating, items, load]);
 
@@ -231,7 +240,10 @@ export default function AssignmentsList() {
                 key={option.value || "all"}
                 type="button"
                 aria-pressed={filter === option.value}
-                onClick={() => setFilter(option.value)}
+                onClick={() => {
+                  setFilter(option.value);
+                  setStatus("loading");
+                }}
               >
                 {option.label}
               </button>
@@ -253,7 +265,7 @@ export default function AssignmentsList() {
         </div>
       )}
 
-      {status === "error" && <ErrorState message={error?.message} onRetry={() => load(1)} />}
+      {status === "error" && <ErrorState message={error?.message} onRetry={() => reload(1)} />}
 
       {empty && !filtered && (
         <div className="empty card">
@@ -310,7 +322,7 @@ export default function AssignmentsList() {
 
       {page < totalPages && status !== "loading" && (
         <div className="history-more">
-          <button type="button" className="btn" onClick={() => load(page + 1)} data-loading={status === "more" || undefined}>
+          <button type="button" className="btn" onClick={() => reload(page + 1)} data-loading={status === "more" || undefined}>
             Load more
           </button>
         </div>

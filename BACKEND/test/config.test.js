@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const path = require("path");
+const { randomSecret } = require("./credentials");
 const { spawnSync } = require("child_process");
 
 function databaseFor(env) {
@@ -13,7 +14,7 @@ function databaseFor(env) {
       env: {
         PATH: process.env.PATH,
         SYSTEMROOT: process.env.SYSTEMROOT,
-        JWT_SECRET: "a-test-secret-that-is-long-enough-for-production",
+        JWT_SECRET: randomSecret(),
         MONGO_DB_NAME: "",
         ...env,
       },
@@ -23,7 +24,7 @@ function databaseFor(env) {
   return JSON.parse(result.stdout);
 }
 
-const noDatabase = "mongodb+srv://user:pass@cluster.example.net/?retryWrites=true";
+const noDatabase = "mongodb+srv://cluster.example.net/?retryWrites=true";
 
 test("local development never uses the production database by default", () => {
   assert.equal(databaseFor({ NODE_ENV: "development", MONGO_URI: noDatabase }), "evaluaite-dev");
@@ -35,7 +36,7 @@ test("production keeps the database it has always used", () => {
 });
 
 test("a database named in the URI or MONGO_DB_NAME wins", () => {
-  assert.equal(databaseFor({ NODE_ENV: "development", MONGO_URI: "mongodb+srv://u:p@host.example/school?w=1" }), null);
+  assert.equal(databaseFor({ NODE_ENV: "development", MONGO_URI: "mongodb+srv://host.example/school?w=1" }), null);
   assert.equal(databaseFor({ NODE_ENV: "production", MONGO_URI: noDatabase, MONGO_DB_NAME: "live" }), "live");
   assert.equal(databaseFor({ NODE_ENV: "development", MONGO_URI: noDatabase, MONGO_DB_NAME: "mine" }), "mine");
 });

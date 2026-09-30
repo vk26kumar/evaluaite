@@ -29,7 +29,9 @@ export default function SheetDropzone({ pages, onChange, error }) {
   const [processing, setProcessing] = useState(0);
   const [rejections, setRejections] = useState([]);
   const pagesRef = useRef(pages);
-  pagesRef.current = pages;
+  useEffect(() => {
+    pagesRef.current = pages;
+  }, [pages]);
 
   useEffect(() => () => pagesRef.current.forEach((page) => page.previewUrl && URL.revokeObjectURL(page.previewUrl)), []);
 

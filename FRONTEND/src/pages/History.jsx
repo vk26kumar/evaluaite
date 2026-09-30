@@ -59,21 +59,29 @@ export default function History() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
 
-  const load = useCallback(async (nextPage, { signal, silent = false } = {}) => {
-    if (!silent) setStatus(nextPage === 1 ? "loading" : "more");
-    try {
-      const data = await api.get(`/api/evaluations?page=${nextPage}&limit=${PAGE_SIZE}`, { signal });
-      setItems((current) => (nextPage === 1 ? data.items : [...current, ...data.items]));
-      setPage(data.page);
-      setTotalPages(data.totalPages);
-      setTotal(data.total);
-      setStatus("ready");
-    } catch (err) {
-      if (signal?.aborted) return;
-      setError(err);
-      setStatus("error");
-    }
-  }, []);
+  const load = useCallback(
+    (nextPage, { signal } = {}) =>
+      api
+        .get(`/api/evaluations?page=${nextPage}&limit=${PAGE_SIZE}`, { signal })
+        .then((data) => {
+          setItems((current) => (nextPage === 1 ? data.items : [...current, ...data.items]));
+          setPage(data.page);
+          setTotalPages(data.totalPages);
+          setTotal(data.total);
+          setStatus("ready");
+        })
+        .catch((err) => {
+          if (signal?.aborted) return;
+          setError(err);
+          setStatus("error");
+        }),
+    []
+  );
+
+  const reload = (nextPage) => {
+    setStatus(nextPage === 1 ? "loading" : "more");
+    load(nextPage);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -84,7 +92,7 @@ export default function History() {
   const grading = items.some((item) => IN_PROGRESS.includes(item.status));
   useEffect(() => {
     if (!grading) return undefined;
-    const timer = setTimeout(() => load(1, { silent: true }), 5000);
+    const timer = setTimeout(() => load(1), 5000);
     return () => clearTimeout(timer);
   }, [grading, items, load]);
 
@@ -118,7 +126,7 @@ export default function History() {
         </div>
       )}
 
-      {status === "error" && <ErrorState message={error?.message} onRetry={() => load(1)} />}
+      {status === "error" && <ErrorState message={error?.message} onRetry={() => reload(1)} />}
 
       {(status === "ready" || status === "more") && items.length === 0 && <EmptyHistory />}
 
@@ -164,7 +172,7 @@ export default function History() {
 
           {page < totalPages && !query && (
             <div className="history-more">
-              <button type="button" className="btn" onClick={() => load(page + 1)} data-loading={status === "more" || undefined}>
+              <button type="button" className="btn" onClick={() => reload(page + 1)} data-loading={status === "more" || undefined}>
                 Load more
               </button>
             </div>

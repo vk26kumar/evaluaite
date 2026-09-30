@@ -36,4 +36,4 @@ const hashPassword = (password) => bcrypt.hash(password, BCRYPT_ROUNDS);
 const verifyPassword = (password, hash) => bcrypt.compare(password, hash);
 const DUMMY_HASH = bcrypt.hashSync("timing-safe-placeholder", BCRYPT_ROUNDS);
 
-module.exports = { passwordSchema, assertNotPersonal, hashPassword, verifyPassword, DUMMY_HASH };
+module.exports = { passwordSchema, assertNotPersonal, hashPassword, verifyPassword, DUMMY_HASH, COMMON_PASSWORDS };
