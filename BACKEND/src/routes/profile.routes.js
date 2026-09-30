@@ -16,6 +16,7 @@ const { signSessionToken } = require("../services/token.service");
 const accountEmail = require("../services/accountEmail.service");
 const { passwordSchema: newPassword, assertNotPersonal, hashPassword, verifyPassword } = require("../utils/password");
 const { buildStudentReport, evaluationStats, studentKey } = require("../services/profile.service");
+const { generateCodes } = require("../services/recoveryCodes.service");
 
 const router = express.Router();
 router.use(requireAuth);
@@ -145,6 +146,34 @@ router.post(
     const user = await User.findByIdAndUpdate(req.user._id, { $inc: { tokenVersion: 1 } }, { new: true });
     void logActivity(req.user, "account.sessions_revoked", { kind: "account" });
     res.json({ token: signSessionToken(user) });
+  })
+);
+
+const recoveryCodesSchema = z.object({ password: z.string().max(128).optional() });
+
+router.get(
+  "/recovery-codes",
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("+recoveryCodes");
+    res.json({ remaining: user.recoveryCodes?.length || 0, createdAt: user.recoveryCodesCreatedAt || null });
+  })
+);
+
+router.post(
+  "/recovery-codes",
+  accountLimiter,
+  validateBody(recoveryCodesSchema),
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("+password");
+    if (user.password && !(await verifyPassword(req.body.password || "", user.password))) {
+      throw ApiError.badRequest("Your password is incorrect.", [{ field: "password", message: "Your password is incorrect." }]);
+    }
+
+    const { codes, hashes } = generateCodes();
+    const createdAt = new Date();
+    await User.updateOne({ _id: user._id }, { $set: { recoveryCodes: hashes, recoveryCodesCreatedAt: createdAt } });
+    void logActivity(req.user, "account.recovery_codes_created", { kind: "account" });
+    res.json({ codes, remaining: codes.length, createdAt });
   })
 );
 

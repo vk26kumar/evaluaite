@@ -53,6 +53,10 @@ export function describeActivity(item) {
       return { ...base, icon: LuKeyRound, text: "Reset your password from an email link" };
     case "account.email_verified":
       return { ...base, icon: LuMailCheck, tone: "good", text: "Confirmed your email address" };
+    case "account.recovery_codes_created":
+      return { ...base, icon: LuKeyRound, text: "Created new recovery codes" };
+    case "account.password_recovered":
+      return { ...base, icon: LuKeyRound, text: "Reset your password with a recovery code", detail: meta.codesLeft !== undefined ? `${meta.codesLeft} codes left` : "" };
     case "account.sessions_revoked":
       return { ...base, icon: LuLogOut, text: "Signed out on every other device" };
     case "assignment.created":

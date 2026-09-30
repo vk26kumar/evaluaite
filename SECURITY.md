@@ -36,8 +36,10 @@ Email **vkumar26062003@gmail.com** with the steps to reproduce. Please don't ope
 - [x] Common passwords and passwords containing the email name are refused.
 - [x] Forgot password: the reply is identical whether or not the account exists. Reset links are random 256-bit tokens, stored only as SHA-256 hashes, single-use, 30 minutes, and a new link cancels the old one.
 - [x] A reset confirms the email, signs out every other session and emails a "password changed" notice.
+- [x] Recovery codes, with no outside service: 10 random codes (50 bits each), shown once, stored only as SHA-256 hashes. Creating them needs the password; each works once; a new set replaces the old; using one signs out every other session. Wrong codes count towards the per-IP and per-account failure limits.
+- [x] Linking Google to an account whose password nobody verified also deletes that account's recovery codes, so codes made by whoever registered the address first stop working.
 - [x] Email confirmation: 24-hour single-use links, resendable from Profile, Account.
-- [ ] Set up the email provider (see "Email" in the README). Until then, forgot password and confirmation are hidden.
+- [ ] Optional: set up an email provider (see "Email" in the README) to add reset links by email.
 
 ### Authorisation and data access
 
@@ -59,7 +61,7 @@ Email **vkumar26062003@gmail.com** with the steps to reproduce. Please don't ope
 | All API requests | 600 per 15 min | IP |
 | Sign-ups | 20 per hour | IP |
 | Failed sign-ins | 20 per 15 min, and 10 per 15 min per account | IP, account |
-| Failed one-time links (Google code, reset, confirm) | 20 per 15 min | IP |
+| Failed one-time links and recovery codes | 20 per 15 min, and 10 per 15 min per account for codes | IP, account |
 | Failed password change, sign-out-all, delete | 10 per 15 min | account |
 | Reset emails | 5 per 15 min, and 3 per hour per address | IP, address |
 | Confirmation emails | 3 per hour | account |
@@ -86,7 +88,7 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 ### Dependencies and CI
 
 - [x] Lockfiles committed; `npm ci` in CI.
-- [x] GitHub Actions on every push and pull request: backend lint and 70 tests (including a throwaway MongoDB), frontend lint and build, and `npm audit` failing on high-severity issues.
+- [x] GitHub Actions on every push and pull request: backend lint and 75 tests (including a throwaway MongoDB), frontend lint and build, and `npm audit` failing on high-severity issues.
 - [x] Dependabot opens at most one grouped pull request per app each Monday (minor and patch updates only) and one a month for GitHub Actions. Major versions are upgraded by hand and tested, because they can change behaviour.
 - [x] Tests contain no hard-coded passwords or secrets: credentials are generated at run time (`BACKEND/test/credentials.js`), and `.gitguardian.yaml` excludes the test folder from secret scanning.
 - [ ] In GitHub settings, turn on Dependabot security updates, secret scanning with push protection, and require the CI check before merging to `main`.

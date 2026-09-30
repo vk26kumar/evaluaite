@@ -21,6 +21,7 @@ const {
 const { signSessionToken, randomToken, sha256 } = require("../services/token.service");
 const { logActivity } = require("../services/activity");
 const accountEmail = require("../services/accountEmail.service");
+const { hashCode } = require("../services/recoveryCodes.service");
 
 const router = express.Router();
 
@@ -44,8 +45,10 @@ const exchangeSchema = z.object({ code: token });
 const forgotSchema = z.object({ email });
 const resetSchema = z.object({ token, password: passwordSchema });
 const verifySchema = z.object({ token });
+const recoverSchema = z.object({ email, code: z.string().trim().min(8).max(40), password: passwordSchema });
 
 const LINK_EXPIRED = "This link has expired or was already used. Request a new one.";
+const CODE_MISMATCH = "That email and recovery code don't match.";
 
 function session(user) {
   void user.recordLogin().catch(() => {});
@@ -141,6 +144,35 @@ router.post(
     void logActivity(user, "account.password_reset", { kind: "account" });
     accountEmail.inBackground(() => accountEmail.sendPasswordChanged(user));
     res.json(session(user));
+  })
+);
+
+router.post(
+  "/password/recover",
+  linkLimiter,
+  validateBody(recoverSchema),
+  loginAccountLimiter,
+  asyncHandler(async (req, res) => {
+    const { email: address, code, password } = req.body;
+    const codeHash = hashCode(code);
+    const user = await User.findByEmail(address).select("+password +recoveryCodes");
+    if (!user || !user.recoveryCodes?.includes(codeHash)) {
+      throw ApiError.badRequest(CODE_MISMATCH, [{ field: "code", message: CODE_MISMATCH }]);
+    }
+    assertNotPersonal(password, user.email);
+
+    const used = await User.updateOne({ _id: user._id, recoveryCodes: codeHash }, { $pull: { recoveryCodes: codeHash } });
+    if (used.modifiedCount === 0) throw ApiError.badRequest(CODE_MISMATCH, [{ field: "code", message: CODE_MISMATCH }]);
+
+    user.password = await hashPassword(password);
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    user.recoveryCodes = user.recoveryCodes.filter((hash) => hash !== codeHash);
+    await user.save();
+
+    const codesLeft = user.recoveryCodes.length;
+    void logActivity(user, "account.password_recovered", { kind: "account", meta: { codesLeft } });
+    accountEmail.inBackground(() => accountEmail.sendPasswordChanged(user));
+    res.json({ ...session(user), codesLeft });
   })
 );
 

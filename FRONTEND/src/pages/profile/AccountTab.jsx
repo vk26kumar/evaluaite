@@ -5,6 +5,7 @@ import { api } from "../../lib/api";
 import { useProviders } from "../../lib/providers";
 import { useAuth, useToast } from "../../context/contexts";
 import Field from "../../components/Field";
+import RecoveryCodes from "./RecoveryCodes";
 
 function SubjectsInput({ value, onChange }) {
   const [draft, setDraft] = useState("");
@@ -385,6 +386,7 @@ export default function AccountTab({ user, onUserChange }) {
       </section>
 
       <PasswordForm hasPassword={Boolean(methods.password)} onChanged={onUserChange} />
+      <RecoveryCodes hasPassword={Boolean(methods.password)} />
       <DeleteAccount hasPassword={Boolean(methods.password)} />
     </div>
   );

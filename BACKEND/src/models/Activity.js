@@ -8,6 +8,8 @@ const ACTIVITY_TYPES = [
   "account.sessions_revoked",
   "account.password_reset",
   "account.email_verified",
+  "account.recovery_codes_created",
+  "account.password_recovered",
   "assignment.created",
   "assignment.generated",
   "assignment.failed",

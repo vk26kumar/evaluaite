@@ -55,13 +55,15 @@ async function findOrCreateGoogleUser(profile) {
 
   if (!email) throw new Error("Google did not share an email address for this account.");
 
-  const byEmail = await User.findByEmail(email, { withPassword: true });
+  const byEmail = await User.findByEmail(email, { withPassword: true }).select("+recoveryCodes");
   if (byEmail) {
     if (!emailVerified) throw new Error("This Google account's email address isn't verified.");
 
     const passwordRemoved = Boolean(byEmail.password) && !byEmail.emailVerified;
     if (passwordRemoved) {
       byEmail.password = undefined;
+      byEmail.recoveryCodes = undefined;
+      byEmail.recoveryCodesCreatedAt = undefined;
       byEmail.tokenVersion = (byEmail.tokenVersion || 0) + 1;
     }
     byEmail.googleId = profile.id;
