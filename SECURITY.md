@@ -89,9 +89,9 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 
 - [x] Lockfiles committed; `npm ci` in CI.
 - [x] GitHub Actions on every push and pull request: backend lint and 75 tests (including a throwaway MongoDB), frontend lint and build, and `npm audit` failing on high-severity issues.
-- [x] Dependabot opens at most one grouped pull request per app each Monday (minor and patch updates only) and one a month for GitHub Actions. Major versions are upgraded by hand and tested, because they can change behaviour.
+- [x] CI also runs every Monday, so `npm audit` catches newly published vulnerabilities without any automated pull requests. Dependencies are upgraded by hand and tested, because new versions can change behaviour.
 - [x] Tests contain no hard-coded passwords or secrets: credentials are generated at run time (`BACKEND/test/credentials.js`), so secret scanners have nothing to flag.
-- [ ] In GitHub settings, turn on Dependabot security updates, secret scanning with push protection, and require the CI check before merging to `main`.
+- [ ] In GitHub settings, turn on secret scanning with push protection, and require the CI check before merging to `main`.
 
 ### Logging and monitoring
 
