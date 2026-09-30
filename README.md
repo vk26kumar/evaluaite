@@ -90,7 +90,7 @@ cd BACKEND  && npm run smoke:paper    # generates a real question paper and writ
 cd FRONTEND && npm run lint && npm run build
 ```
 
-GitHub Actions runs the same checks, plus `npm audit`, on every push and pull request, and every Monday morning so a newly published vulnerability fails the build even when nothing was pushed (`.github/workflows/ci.yml`). Dependencies are updated by hand and tested.
+GitHub Actions runs the same checks, plus `npm audit`, on every push and pull request (`.github/workflows/ci.yml`). Dependencies are updated by hand and tested.
 
 In development, emails aren't sent: the backend prints them, links included, to its console.
 
