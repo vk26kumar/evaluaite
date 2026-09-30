@@ -91,7 +91,7 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 - [x] GitHub Actions on every push and pull request: backend lint and 75 tests (including a throwaway MongoDB), frontend lint and build, and `npm audit` failing on high-severity issues.
 - [x] Dependencies are upgraded by hand and tested, because new versions can change behaviour. Run `npm audit` in both folders now and then; CI runs it on every push.
 - [x] Tests contain no hard-coded passwords or secrets: credentials are generated at run time (`BACKEND/test/credentials.js`), so secret scanners have nothing to flag.
-- [ ] In GitHub settings, turn on secret scanning with push protection, and require the CI check before merging to `main`.
+- [x] Secret scanning and push protection are on. Changes go straight to `main`, and CI checks every push.
 
 ### Logging and monitoring
 
