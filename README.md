@@ -584,10 +584,10 @@ The look is called **"Red Pen"**: exam paper and a teacher's red pen.
 ## 16. History and key decisions
 
 **Timeline**
-The project was built in two phases, both by me.
+The project was built in two phases.
 
 - **Phase 1 (March to April 2025):** the first version. It graded answer sheets through an early Gemini integration, used Cohere for Q&A, and had a simple interface. It proved the idea worked, and showed what had to change.
-- **Phase 2 (September to October 2026):** a rebuild from the ground up as a production-quality app:
+- **Phase 2 (September to October 2026):** a solo rebuild from the ground up as a production-quality app:
   - real two-pass AI grading, question papers with answer keys, the profile with student marks and history, and a new interface
   - security hardening, 75 automated tests and CI
   - a fresh deployment at evaluaite.onrender.com with its own database
