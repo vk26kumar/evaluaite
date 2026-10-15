@@ -1,0 +1,37 @@
+[
+  {
+    "question": "Which key uniquely identifies each row of a table? Options: (A) foreign key, (B) primary key, (C) composite attribute, (D) alternate index.",
+    "referenceAnswer": "(B) primary key",
+    "maxMarks": 1
+  },
+  {
+    "question": "Which SQL command removes a table's structure and all its data permanently? Options: (A) DELETE, (B) TRUNCATE, (C) DROP, (D) REMOVE.",
+    "referenceAnswer": "(C) DROP",
+    "maxMarks": 1
+  },
+  {
+    "question": "What is a foreign key? Explain with an example.",
+    "referenceAnswer": "- A foreign key is a column in one table that refers to the primary key of another table and links the two tables (2 marks).\n- A correct example, e.g. customer_id in ORDERS referring to CUSTOMERS(customer_id) (1 mark).",
+    "maxMarks": 3
+  },
+  {
+    "question": "What is normalisation? Name the three anomalies it removes.",
+    "referenceAnswer": "- Normalisation is organising data into well-structured tables to reduce redundancy and dependency (1.5 marks).\n- It removes the insertion, update and deletion anomalies (1.5 marks, 0.5 each).",
+    "maxMarks": 3
+  },
+  {
+    "question": "Differentiate between DDL and DML, giving two examples of commands for each.",
+    "referenceAnswer": "- DDL (Data Definition Language) defines or changes the structure of database objects (1 mark); examples CREATE, ALTER, DROP (1 mark).\n- DML (Data Manipulation Language) works on the data stored in tables (1 mark); examples INSERT, UPDATE, DELETE (1 mark).",
+    "maxMarks": 4
+  },
+  {
+    "question": "Write an SQL query to display the name and marks of students who scored more than 80, sorted by marks from highest to lowest, from the table STUDENT(roll_no, name, marks).",
+    "referenceAnswer": "SELECT name, marks FROM STUDENT WHERE marks > 80 ORDER BY marks DESC;\n- SELECT name, marks (1 mark), FROM STUDENT (1 mark), WHERE marks > 80 (1 mark), ORDER BY marks DESC (1 mark).",
+    "maxMarks": 4
+  },
+  {
+    "question": "Explain 1NF, 2NF and 3NF briefly.",
+    "referenceAnswer": "- 1NF: every column holds atomic values and there are no repeating groups (1 mark).\n- 2NF: in 1NF and no partial dependency of a non-key attribute on part of a composite key (1.5 marks).\n- 3NF: in 2NF and no transitive dependency; non-key attributes depend only on the key (1.5 marks).",
+    "maxMarks": 4
+  }
+]

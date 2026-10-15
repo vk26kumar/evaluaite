@@ -1,0 +1,42 @@
+[
+  {
+    "question": "The SI unit of electric resistance is: Options: (A) volt, (B) ampere, (C) ohm, (D) watt.",
+    "referenceAnswer": "(C) ohm",
+    "maxMarks": 1
+  },
+  {
+    "question": "Which instrument is used to measure electric current in a circuit? Options: (A) voltmeter, (B) ammeter, (C) galvanometer, (D) potentiometer.",
+    "referenceAnswer": "(B) ammeter",
+    "maxMarks": 1
+  },
+  {
+    "question": "State Ohm's law.",
+    "referenceAnswer": "- At constant temperature, the current through a conductor is directly proportional to the potential difference across its ends (1 mark).\n- Written as V = IR, where R is the resistance (1 mark).",
+    "maxMarks": 2
+  },
+  {
+    "question": "Define electric power and give its SI unit.",
+    "referenceAnswer": "- Electric power is the rate at which electrical energy is consumed or work is done, P = VI (1 mark).\n- Its SI unit is the watt, W (1 mark).",
+    "maxMarks": 2
+  },
+  {
+    "question": "A 12 V battery is connected across a 4 Ω resistor. Find the current in the circuit and the power used by the resistor.",
+    "referenceAnswer": "I = V/R = 12/4 = 3 A (1.5 marks).\nP = VI = 12 × 3 = 36 W (1.5 marks).",
+    "maxMarks": 3
+  },
+  {
+    "question": "Three resistors of 2 Ω, 3 Ω and 6 Ω are connected (a) in series and (b) in parallel. Find the equivalent resistance in each case.",
+    "referenceAnswer": "(a) Series: R = 2 + 3 + 6 = 11 Ω (1.5 marks).\n(b) Parallel: 1/R = 1/2 + 1/3 + 1/6 = 1, so R = 1 Ω (1.5 marks).",
+    "maxMarks": 3
+  },
+  {
+    "question": "Why are household appliances connected in parallel and not in series? Give three reasons.",
+    "referenceAnswer": "- Each appliance gets the full mains voltage of 220 V (about 1.5 marks).\n- If one appliance is switched off or fails, the others keep working (about 1.5 marks).\n- Each appliance draws current according to its own resistance and can have its own switch and fuse (1 mark).",
+    "maxMarks": 4
+  },
+  {
+    "question": "Explain the heating effect of electric current. State Joule's law of heating and give two applications.",
+    "referenceAnswer": "- Current through a resistor converts electrical energy into heat (1 mark).\n- Joule's law: H = I²Rt, heat is proportional to the square of the current, the resistance and the time (2 marks).\n- Two applications, e.g. electric iron, heater or geyser, filament bulb, fuse (1 mark).",
+    "maxMarks": 4
+  }
+]
