@@ -9,7 +9,7 @@ The AI suggests; the teacher decides. Every mark can be checked, explained and c
 | Website | https://evaluaite.onrender.com |
 | API (backend) | https://evaluaite-api.onrender.com |
 | Health check | https://evaluaite-api.onrender.com/api/health |
-| Code | https://github.com/vk26kumar/evaluaite (private) |
+| Code | https://github.com/vk26kumar/evaluaite |
 
 This README is the complete guide: what every feature does, how it works inside, which technologies are used and why, how to run, test and deploy it, and what to do when something breaks. Security details are in [SECURITY.md](SECURITY.md).
 
@@ -291,7 +291,7 @@ Gemini returns a JSON outline: title, slides with bullet points and speaker note
 |---|---|
 | Render (web service, free) | The API at `evaluaite-api.onrender.com` |
 | Render (static site, free) | The website at `evaluaite.onrender.com` |
-| MongoDB Atlas (free M0, cluster0) | The database `evaluaite`. |
+| MongoDB Atlas (free M0, cluster0) | The database `evaluaite` |
 | Google AI Studio / Gemini API | AI (key from aistudio.google.com) |
 | Google Cloud project `ai-evaluaite` | The OAuth client for "Continue with Google" |
 | A cron job (outside the repo) | Pings `/api/health` so the free backend doesn't sleep |
@@ -497,7 +497,7 @@ cd BACKEND  && npm run smoke:paper           # writes a real question paper and 
 - **Rate limits:** a real server is started with limits on, to prove the counters are separate.
 - **CI:** `.github/workflows/ci.yml` runs all of this, plus `npm audit`, on every push and pull request.
 
-**Sample test papers.** The `samples/` folder, if present, has two complete papers (Physics: Electricity; DBMS and SQL), each with answer keys and three handwritten-style student sheets (strong, average and weak). Its README lists the marks the real AI gave, which is useful for checking grading after any change.
+**Sample test papers.** The `samples/` folder has two complete papers (Physics: Electricity; DBMS and SQL), each with answer keys and three handwritten-style student sheets (strong, average and weak). Its README lists the marks the real AI gave, which is useful for checking grading after any change.
 
 ---
 
@@ -584,11 +584,13 @@ The look is called **"Red Pen"**: exam paper and a teacher's red pen.
 ## 16. History and key decisions
 
 **Timeline**
-- **2025:** the first version, with Cohere for Q&A and an early Gemini integration.
-- **September 2026:** rebuilt from the ground up as a production-quality app:
-  - real two-pass AI grading, question papers, the profile with student marks and history, and a new interface
-  - security hardening and tests
-- **October 2026:** moved into this private repository and deployed separately as a personal project, with its own database.
+The project was built in two phases, both by me.
+
+- **Phase 1 (March to April 2025):** the first version. It graded answer sheets through an early Gemini integration, used Cohere for Q&A, and had a simple interface. It proved the idea worked, and showed what had to change.
+- **Phase 2 (September to October 2026):** a rebuild from the ground up as a production-quality app:
+  - real two-pass AI grading, question papers with answer keys, the profile with student marks and history, and a new interface
+  - security hardening, 75 automated tests and CI
+  - a fresh deployment at evaluaite.onrender.com with its own database
 
 **Decisions and why**
 - **Gemini instead of Cohere:** Gemini reads handwriting directly from images and PDFs and returns JSON in a fixed shape, so one provider covers everything.
