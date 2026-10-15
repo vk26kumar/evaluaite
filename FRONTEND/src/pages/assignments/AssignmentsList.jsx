@@ -130,12 +130,14 @@ export default function AssignmentsList() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    const next = search.trim();
+    if (next === query) return undefined;
     const timer = setTimeout(() => {
-      setQuery(search.trim());
+      setQuery(next);
       setStatus("loading");
     }, 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, query]);
 
   const load = useCallback(
     (nextPage, { signal } = {}) => {
