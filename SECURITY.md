@@ -81,7 +81,7 @@ Each row has its own counter, so mistakes in one place (for example a bad link) 
 - [x] Configuration is validated at startup; the server refuses to start in production with a weak secret or with the development email mode.
 - [x] `.env` files are git-ignored; only `.env.example` is committed. Nothing secret is in the frontend bundle.
 - [x] Local runs use a separate `evaluaite-dev` database, never production data.
-- [x] Secrets shown in screenshots or chat have been rotated.
+- [x] Any secret that was ever exposed has been rotated.
 - [x] The old Cohere integration is gone from the code and from Render.
 - [ ] If Gemini billing is ever turned on: restrict the key to the Generative Language API and set a Google Cloud budget alert. (Billing is off, so a leaked key can only use the free quota.)
 
